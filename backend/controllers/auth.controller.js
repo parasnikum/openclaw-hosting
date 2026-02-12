@@ -110,13 +110,10 @@ exports.login = async (req, res) => {
 
         res.cookie("jwt", token, {
             httpOnly: true,
-            // Set secure to true if using HTTPS, but for localhost plain http, false is fine
             secure: process.env.NODE_ENV === "production",
-            // "Lax" works for localhost if the domains match, 
-            // but "None" + secure: true is required if they are true cross-site.
             sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
             maxAge: 24 * 60 * 60 * 1000,
-            path: "/", // Ensure cookie is available for all routes
+            path: "/",
         });
         return res.status(200).json({ token, status: "Logged in successfully" });
     } catch (error) {

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Lock, Mail, Zap, ArrowRight, Github, Chrome, Moon, Sun 
+import {
+  Lock, Mail, Zap, ArrowRight, Github, Chrome, Moon, Sun
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -19,7 +20,6 @@ export default function LoginPage() {
     email: '',
     password: ''
   });
-console.log(`${import.meta.env.VITE_API_URL}`);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -47,13 +47,21 @@ console.log(`${import.meta.env.VITE_API_URL}`);
           password: formData.password
         }),
         // IMPORTANT: Required to receive and store HttpOnly cookies
-        credentials: 'include' 
+        credentials: 'include'
       });
 
       const data = await response.json();
 
       if (response.ok) {
         toast.success('Successfully logged in');
+        // Set the cookie (expires in 7 days)
+        console.log(data);
+        
+        Cookies.set('jwt', data.token, {
+          expires: 7,
+          secure: false,
+          sameSite: 'Lax'
+        });
         navigate('/instances');
       } else {
         // Handle specific "Not Verified" case from your controller
@@ -74,7 +82,7 @@ console.log(`${import.meta.env.VITE_API_URL}`);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background transition-colors duration-500">
-      
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] dark:bg-primary/5" />
@@ -109,25 +117,25 @@ console.log(`${import.meta.env.VITE_API_URL}`);
               Secure access required
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-4">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="email" 
+                  <Input
+                    id="email"
                     type="email"
-                    placeholder="admin@cloudnode.io" 
+                    placeholder="admin@cloudnode.io"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all" 
-                    required 
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all"
+                    required
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
                   <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Password</Label>
@@ -135,21 +143,21 @@ console.log(`${import.meta.env.VITE_API_URL}`);
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="password" 
-                    type="password" 
+                  <Input
+                    id="password"
+                    type="password"
                     placeholder="••••••••"
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all" 
-                    required 
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all"
+                    required
                   />
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl font-bold text-base transition-all shadow-lg shadow-primary/20 mt-2" 
+              <Button
+                type="submit"
+                className="w-full h-12 rounded-xl font-bold text-base transition-all shadow-lg shadow-primary/20 mt-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -180,7 +188,7 @@ console.log(`${import.meta.env.VITE_API_URL}`);
           <CardFooter className="flex flex-col space-y-4 pb-8 pt-2">
             <p className="text-center text-xs text-muted-foreground font-medium">
               Don't have an account?{' '}
-              <button 
+              <button
                 type="button"
                 onClick={() => navigate('/register')}
                 className="text-primary font-black hover:underline underline-offset-4"

@@ -194,7 +194,8 @@ exports.updateServiceConfig = async (req, res) => {
 exports.getUserServices = async (req, res) => {
   try {
     const user_id = req.user.userid;
-
+    console.log(user_id);
+    
     // Join with plans to show plan name and price in the list
     const query = `
             SELECT s.*, p.plan_name, p.price, p.category 

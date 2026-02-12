@@ -22,6 +22,7 @@ import AdminNodes from "./pages/admin/Nodes";
 import AdminDashboard from "./pages/admin/Dashboard";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import TransactionsPage from "./pages/Transactions";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -34,24 +35,27 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route element={<DashboardLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/instances" element={<Instances />} />
-            <Route path="/instances/:id" element={<InstanceDetail />} />
-            <Route path="/services" element={<AdminServices />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/nodes" element={<AdminNodes />} />
-            <Route path="/admin/plans" element={<AdminPlans />} />
-            <Route path="/services/:id" element={<AdminServiceDetail />} />
-            <Route path="/create" element={<CreateInstance />} />
-            <Route path="/transactions" element={<TransactionsPage />} />
-            <Route path="/monitoring" element={<Monitoring />} />
-            <Route path="/billing" element={<Billing />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/checkout/success" element={<CheckoutSuccess />} />
-            <Route path="/checkout/failed" element={<CheckoutFailed />} />
-            <Route path="/checkout/pending" element={<CheckoutPending />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/instances" element={<Instances />} />
+              <Route path="/instances/:id" element={<InstanceDetail />} />
+              <Route path="/services" element={<AdminServices />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/nodes" element={<AdminNodes />} />
+              <Route path="/admin/plans" element={<AdminPlans />} />
+              <Route path="/services/:id" element={<AdminServiceDetail />} />
+              <Route path="/create" element={<CreateInstance />} />
+              <Route path="/transactions" element={<TransactionsPage />} />
+              <Route path="/monitoring" element={<Monitoring />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/checkout/failed" element={<CheckoutFailed />} />
+              <Route path="/checkout/pending" element={<CheckoutPending />} />
+            </Route>
           </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

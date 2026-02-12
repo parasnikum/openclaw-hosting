@@ -1,3 +1,5 @@
-import Docker from "dockerode";
+const Docker = require("dockerode")
 
-export const docker = new Docker();
+const docker = new Docker();
+
+module.exports = { docker }

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+const crypto = require("crypto");
 
 const ALGORITHM = 'aes-256-gcm';
 const KEY = process.env.ENCRYPTION_KEY;
@@ -6,7 +6,7 @@ const IV_LENGTH = 16;
 console.log(KEY);
 
 
-export function encryptEnvValue(plainText) {
+function encryptEnvValue(plainText) {
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(KEY, 'hex'), iv);
     let encrypted = cipher.update(plainText, 'utf8', 'hex');
@@ -15,7 +15,7 @@ export function encryptEnvValue(plainText) {
     return `${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
 
-export function decryptEnvValue(encryptedText) {
+function decryptEnvValue(encryptedText) {
     const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
@@ -25,3 +25,10 @@ export function decryptEnvValue(encryptedText) {
     decrypted += decipher.final('utf8');
     return decrypted;
 }
+
+
+
+module.exports = {
+    encryptEnvValue,
+    decryptEnvValue,
+};

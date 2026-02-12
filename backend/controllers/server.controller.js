@@ -1,6 +1,6 @@
-import { docker } from "../config/docker.js";
-import pool from "../config/db.js";
-import { config } from "dotenv";
+const { docker } = require("../config/docker");
+const pool = require("../config/db");
+const { config } = require("dotenv");
 
 config({ path: "../.env" });
 
@@ -60,7 +60,7 @@ async function doRestart(server) {
 /* Single Action Controller                            */
 /* -------------------------------------------------- */
 
-export async function action(req, res) {
+async function action(req, res) {
   try {
     const { server_id } = req.params;
     const { action } = req.body;
@@ -117,3 +117,6 @@ export async function action(req, res) {
     });
   }
 }
+
+
+module.exports =  { action }
