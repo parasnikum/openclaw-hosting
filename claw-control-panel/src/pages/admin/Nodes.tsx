@@ -188,7 +188,7 @@ export default function AdminNodes() {
 
                                 <div className="space-y-2">
                                     <Label className="text-[10px] uppercase font-black ml-1">Domain</Label>
-                                    <Input placeholder="node.zyrox.host" value={currentNode.domain} onChange={(e) => setCurrentNode({ ...currentNode, domain: e.target.value })} className="rounded-xl bg-muted/20 border-border/50" />
+                                    <Input placeholder="node.BerryBox.host" value={currentNode.domain} onChange={(e) => setCurrentNode({ ...currentNode, domain: e.target.value })} className="rounded-xl bg-muted/20 border-border/50" />
                                 </div>
                             </div>
 

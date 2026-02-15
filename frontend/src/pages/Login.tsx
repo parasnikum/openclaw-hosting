@@ -9,17 +9,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
+import { isAuthenticated } from '@/lib/auth';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
-  // 1. Form State
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isLoggedin = await isAuthenticated();
+      if (isLoggedin) {
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -31,7 +41,6 @@ export default function LoginPage() {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
-  // 2. Handle Login Submission
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,14 +48,11 @@ export default function LoginPage() {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password
         }),
-        // IMPORTANT: Required to receive and store HttpOnly cookies
         credentials: 'include'
       });
 
@@ -54,26 +60,20 @@ export default function LoginPage() {
 
       if (response.ok) {
         toast.success('Successfully logged in');
-        // Set the cookie (expires in 7 days)
-        console.log(data);
-        
         Cookies.set('jwt', data.token, {
           expires: 7,
-          secure: false,
+          secure: true,
           sameSite: 'Lax'
         });
-        navigate('/instances');
+        navigate('/dashboard');
       } else {
-        // Handle specific "Not Verified" case from your controller
         if (response.status === 403) {
           toast.error(data.msg || "Please verify your email.");
-          // Optional: navigate('/verify-notice');
         } else {
           toast.error(data.msg || "Invalid credentials");
         }
       }
     } catch (error) {
-      console.error("Login Error:", error);
       toast.error("Could not connect to the authentication server.");
     } finally {
       setIsLoading(false);
@@ -103,34 +103,37 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] space-y-6 relative z-10 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2 transform transition-transform hover:scale-105">
+          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2 transform transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate('/')}>
             <Zap className="h-8 w-8 text-primary-foreground fill-current" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">CloudNode</h1>
-          <p className="text-sm text-muted-foreground font-medium">Instance Management Portal</p>
+          <p className="text-sm text-muted-foreground font-medium px-4">Instance Management Portal</p>
         </div>
 
-        <Card className="border-border/50 shadow-2xl backdrop-blur-md bg-card/70 dark:bg-card/80 rounded-3xl overflow-hidden">
-          <CardHeader className="space-y-1 pb-4">
+        <Card className="border-border/50 shadow-2xl backdrop-blur-md bg-card/70 dark:bg-card/80 rounded-3xl overflow-hidden mx-auto">
+          <div className="h-1.5 w-full bg-primary/20">
+             <div className="h-full bg-primary w-full" />
+          </div>
+          <CardHeader className="space-y-1 pb-4 pt-6">
             <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-            <CardDescription className="text-xs uppercase font-bold tracking-widest text-primary/70">
+            <CardDescription className="text-[10px] uppercase font-black tracking-[0.2em] text-primary/70">
               Secure access required
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-8">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="admin@cloudnode.io"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all"
+                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl transition-all"
                     required
                   />
                 </div>
@@ -139,17 +142,24 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
                   <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Password</Label>
-                  <button type="button" className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-tighter">Forgot Secret?</button>
+                  {/* FIXED: Added forgot password navigation */}
+                  <button 
+                    type="button" 
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
+                  >
+                    Forgot Secret?
+                  </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all"
+                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl transition-all"
                     required
                   />
                 </div>
@@ -171,15 +181,15 @@ export default function LoginPage() {
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50"></span></div>
               <div className="relative flex justify-center text-[10px] uppercase font-black">
-                <span className="bg-card px-3 text-muted-foreground tracking-widest">Sso Gateway</span>
+                <span className="bg-card dark:bg-[#1c1c1f] px-3 text-muted-foreground tracking-widest">Sso Gateway</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="h-11 rounded-xl border-border/50 bg-muted/20 hover:bg-muted/40 font-bold text-xs uppercase">
+              <Button variant="outline" className="h-11 rounded-xl border-border/50 bg-muted/20 hover:bg-muted/40 font-bold text-[10px] uppercase tracking-widest">
                 <Github className="mr-2 h-4 w-4" /> Github
               </Button>
-              <Button variant="outline" className="h-11 rounded-xl border-border/50 bg-muted/20 hover:bg-muted/40 font-bold text-xs uppercase">
+              <Button variant="outline" className="h-11 rounded-xl border-border/50 bg-muted/20 hover:bg-muted/40 font-bold text-[10px] uppercase tracking-widest">
                 <Chrome className="mr-2 h-4 w-4" /> Google
               </Button>
             </div>

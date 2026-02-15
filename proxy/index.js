@@ -1,36 +1,28 @@
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
 const { Pool } = require("pg");
 const http = require("http");
-const ip = require("ip"); // for subnet checks
+const httpProxy = require("http-proxy");
 
 require("dotenv").config();
 
 const app = express();
 
-// PostgreSQL connection
 const pool = new Pool({
-  host: process.env.DB_HOST || "pg-394da032-ncername-4ae2.j.aivencloud.com",
-  port: process.env.DB_PORT || 12749,
-  user: process.env.DB_USER || "avnadmin",
-  password: process.env.DB_PASSWORD || "AVNS_vq39ATh-NM6f-7AzolZ",
-  database: process.env.DB_NAME || "openclaw",
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER ,
+  password: process.env.DB_PASSWORD ,
+  database: process.env.DB_NAME ,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
   ssl: { rejectUnauthorized: false },
 });
 
-// Trusted proxies (Docker bridge and localhost)
-const TRUSTED_PROXIES = ["172.17.0.0/16", "127.0.0.1"];
+const domainCache = new Map();
+const CACHE_TTL = 10_000;
 
-// Check if an IP is inside trusted subnets
-function isTrustedProxy(clientIp) {
-  return TRUSTED_PROXIES.some(subnet => ip.cidrSubnet(subnet).contains(clientIp));
-}
-
-// Fetch target backend from database
-async function getTarget(hostname) {
+async function getTargetFromDB(hostname) {
   const client = await pool.connect();
   try {
     const res = await client.query(
@@ -43,72 +35,121 @@ async function getTarget(hostname) {
       `,
       [hostname]
     );
+
     if (res.rows.length === 0) return null;
-    const { ip: targetIp, port } = res.rows[0];
-    return `http://${targetIp}:${port}`;
+    
+    const { ip, port } = res.rows[0];
+    console.log(ip,port);
+    return `http://${ip}:${port}`;
   } finally {
     client.release();
   }
 }
 
-// Middleware to dynamically proxy HTTP requests
-app.use(async (req, res, next) => {
+async function resolveTarget(hostname) {
+  const cached = domainCache.get(hostname);
+
+  if (cached && cached.expires > Date.now()) {
+    return cached.target;
+  }
+
+  const target = await getTargetFromDB(hostname);
+
+  if (target) {
+    domainCache.set(hostname, {
+      target,
+      expires: Date.now() + CACHE_TTL,
+    });
+  }
+
+  return target;
+}
+
+
+const proxy = httpProxy.createProxyServer({
+  ws: true,
+  changeOrigin: true,
+  proxyTimeout: 30000,
+  timeout: 30000,
+});
+
+proxy.on("error", (err, req, res) => {
+  console.error(`[Proxy Error] Target: ${req.url} - Error: ${err.message}`);
+
+  if (res && !res.headersSent) {
+    if (typeof res.writeHead === 'function') {
+      res.writeHead(502, { "Content-Type": "text/plain" });
+      res.end("Bad Gateway: Target unreachable or timed out.");
+    }
+  }
+});
+
+app.use(async (req, res) => {
   try {
-    const hostHeader = req.headers.host;
-    if (!hostHeader) return res.status(400).send("No Host header");
-
-    const hostname = hostHeader.split(":")[0];
-    const target = await getTarget(hostname);
-
-    if (!target) return res.status(404).send("Domain not configured");
-
-    const clientIp = (req.socket.remoteAddress || "").replace("::ffff:", "");
-    if (!isTrustedProxy(clientIp)) {
-      console.warn(`Untrusted proxy connection from ${clientIp}`);
+    if (!req.headers.host) {
+      return res.status(400).send("Missing Host header");
     }
 
-    // Proxy request
-    createProxyMiddleware({
-      target,
-      changeOrigin: true,
-      ws: true,
-      xfwd: true,
-      proxyTimeout: 60000,
-      timeout: 60000,
-    })(req, res, next);
+    const hostname = req.headers.host.split(":")[0].split(".")[0];
+    
+    const target = await resolveTarget(hostname);
+
+    if (!target) {
+      return res.status(404).send("Domain not configured");
+    }
+
+    proxy.web(req, res, { target, changeOrigin: true, });
+
   } catch (err) {
-    console.error("Proxy error:", err);
-    res.status(500).send("Internal server error");
+    console.error("HTTP routing error:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-// Create HTTP server and handle WebSockets
+/* =========================
+   HTTP Server
+========================= */
+
 const server = http.createServer(app);
 
-server.on("upgrade", async (req, socket, head) => {
-  try {
-    const hostHeader = req.headers.host;
-    if (!hostHeader) return socket.destroy();
+/* =========================
+   WebSocket Upgrade Handling
+========================= */
 
-    const hostname = hostHeader.split(":")[0];
-    const target = await getTarget(hostname);
+server.on("upgrade", (req, socket, head) => {
+  socket.on("error", (err) => {
+    if (err.code !== "ECONNRESET") {
+      console.error("Socket error:", err.message);
+    }
+  });
 
-    if (!target) return socket.destroy();
-
-    // Use same proxy middleware for WS
-    createProxyMiddleware({
-      target,
-      changeOrigin: true,
-      ws: true,
-      xfwd: true,
-    }).upgrade(req, socket, head);
-  } catch (err) {
-    console.error("WebSocket proxy error:", err);
+  if (!req.headers.host) {
     socket.destroy();
+    return;
   }
+
+  const hostname = req.headers.host.split(":")[0].split(".")[0];
+
+  resolveTarget(hostname)
+    .then((target) => {
+      if (!target) {
+        socket.destroy();
+        return;
+      }
+
+      proxy.ws(req, socket, head, { target });
+    })
+    .catch((err) => {
+      console.error("WebSocket routing error:", err);
+      socket.destroy();
+    });
 });
 
-// Start server
+
+/* =========================
+   Start Server
+========================= */
+
 server.listen(8081, "0.0.0.0", () => {
   console.log("Dynamic proxy running on 0.0.0.0:8081");
 });

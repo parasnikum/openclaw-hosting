@@ -3,18 +3,26 @@ import fs from "fs";
 import path from "path";
 import getPort from "get-port";
 import pool from "../config/db.js";
-import { encryptEnvValue } from "../utils/encryption.js";
+import { decryptEnvValue, encryptEnvValue } from "../utils/encryption.js";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "dotenv";
+import { generateConfig } from "../utils/generateConfig.js";
 
 config({ path: "../.env" });
 
-const imageName = {
+/* -------------------------------------------------- */
+/* Constants                                          */
+/* -------------------------------------------------- */
+
+const BASE_DIR = "C:/openclaw";
+const GATEWAY_PORT = 18789;
+
+const IMAGE_MAP = {
   n8n: "n8n-berry-box",
   openclaw: "openclaw-local",
   nodejs: "nodejs-berry-box",
-  python: "n8n-berry-box",
+  python: "python-berry-box",
 };
 
 /* -------------------------------------------------- */
@@ -29,13 +37,13 @@ async function stopAndRemoveContainer(containerId) {
     await container.stop({ t: 10 }).catch(() => { });
     await container.remove({ force: true }).catch(() => { });
   } catch {
-    // container already gone
+    // Container already removed
   }
 }
 
 function ensureDirs(serviceId) {
-  const configBaseDir = `C:/openclaw/${serviceId}/config`;
-  const workspaceDir = `C:/openclaw/${serviceId}/workspace`;
+  const configBaseDir = path.join(BASE_DIR, serviceId, "config");
+  const workspaceDir = path.join(BASE_DIR, serviceId, "workspace");
 
   fs.mkdirSync(configBaseDir, { recursive: true });
   fs.mkdirSync(workspaceDir, { recursive: true });
@@ -43,28 +51,42 @@ function ensureDirs(serviceId) {
   return { configBaseDir, workspaceDir };
 }
 
-function writeGatewayConfig(configBaseDir, token) {
-  const gatewayConfigPath = path.join(configBaseDir, "openclaw.json");
+function writeGatewayConfig(configBaseDir, token, hostname, envs, agentsConfig, channels) {
+  const providers = {
+    openai: {},
+    google: {},
+    anthropic: {},
+    openrouter: {},
+    "vercel-ai-gateway": {},
+  }
+  const configPath = path.join(configBaseDir, "openclaw.json");
 
-  const gatewayConfig = {
+  let agentsObj = agentsConfig || {};
+  console.log(typeof agentsConfig);
+  console.log(agentsConfig);
+  
+  // console.log("PARSE",JSON.parse(agentsConfig));
+  
+  let configData = {
     gateway: {
       mode: "local",
       bind: "lan",
-      port: 18789,
-      controlUi: { enabled: true, allowInsecureAuth: true },
+      port: GATEWAY_PORT,
+      controlUi: { enabled: true, allowInsecureAuth: true, "allowedOrigins": [`http://${hostname}.localhost:8081`] },
       auth: { mode: "token", token },
       trustedProxies: ["192.168.65.0/24", "172.17.0.0/16"],
     },
+    agents : agentsConfig,
+    ...(channels && { channels })
   };
 
-  fs.writeFileSync(
-    gatewayConfigPath,
-    JSON.stringify(gatewayConfig, null, 2),
-    "utf8"
-  );
+  console.log("configData", configData);
+
+
+  fs.writeFileSync(configPath, JSON.stringify(configData, null, 2));
 }
 
-async function createGatewayContainer({
+async function createContainer({
   serviceId,
   category,
   token,
@@ -72,22 +94,62 @@ async function createGatewayContainer({
   configBaseDir,
   workspaceDir,
 }) {
-  const date = Date.now();
+  const image = IMAGE_MAP[category];
 
+  if (!image) {
+    throw new Error(`Unsupported category: ${category}`);
+  }
+  const envRes = await pool.query(
+    `SELECT name , value FROM envs WHERE service_id = $1`,
+    [serviceId]
+  );
+  if (!envRes.rows.length) {
+    throw new Error(`No hostname found for serviceId: ${serviceId}`);
+  }
+
+  const map = {
+    "OPENAI_API_KEY": "--openai-api-key",
+    "OPENROUTER_API_KEY": "--openrouter-api-key",
+    "ANTHROPIC_API_KEY": "--anthropic-api-key",
+    "VERCEL_AI_GATEWAY_API_KEY": "--ai-gateway-api-key",
+    "GOOGLE_API_KEY": "--gemini-api-key",
+    "MOONSHOT_API_KEY": "--moonshot-api-key",
+    "KIMI_API_KEY": "--kimi-code-api-key",
+    "ZAI_API_KEY": "--zai-api-key",
+    "MINIMAX_API_KEY": "--minimax-api-key",
+    "SYNTHETIC_API_KEY": "--synthetic-api-key",
+    "OPENCODE_API_KEY": "--opencode-zen-api-key"
+  };
+  const envs = envRes.rows
+  const envValues = {};
+  let cmdEnv = [];
+  envs.forEach(row => {
+    envValues[row.name] = row.value
+
+    const flag = map[row.name];
+    if (flag && row.value) {
+      // cmdEnv.push(flag, row.value);
+    }
+  });
+
+  const envArray = Object.entries(envValues).map(
+    ([key, value]) => `${key}=${decryptEnvValue(value)}`
+  );
   const container = await docker.createContainer({
-    name: `openclaw-gateway-${serviceId}-${date}`,
-    Image: imageName[category],
+    name: `openclaw-${serviceId}-${Date.now()}`,
+    Image: image,
     Env: [
       "HOME=/home/node",
       "TERM=xterm-256color",
       `OPENCLAW_GATEWAY_TOKEN=${token}`,
+      ...envArray
     ],
     ExposedPorts: {
-      "18789/tcp": {},
+      [`${GATEWAY_PORT}/tcp`]: {},
     },
     HostConfig: {
       PortBindings: {
-        "18789/tcp": [{ HostPort: String(port) }],
+        [`${GATEWAY_PORT}/tcp`]: [{ HostPort: String(port) }],
       },
       Binds: [
         `${configBaseDir}:/home/node/.openclaw`,
@@ -95,6 +157,9 @@ async function createGatewayContainer({
       ],
       RestartPolicy: { Name: "unless-stopped" },
       Init: true,
+      // CpuShares: 5,
+      // Memory: (1024 * 1024 * 1024),
+      // MemorySwap: 0,
     },
     Cmd: [
       "node",
@@ -102,61 +167,21 @@ async function createGatewayContainer({
       "gateway",
       "--bind",
       "lan",
+      "--allow-unconfigured",
       "--port",
-      "18789",
+      String(GATEWAY_PORT),
+      // ...cmdEnv
     ],
+
   });
 
   await container.start();
   return container;
 }
 
-async function createOpenClawContainer({
-  serviceId,
-  category,
-  port,
-  configBaseDir,
-  workspaceDir,
-}) {
-  const date = Date.now();
-
-  const container = await docker.createContainer({
-    name: `openclaw-gateway-${serviceId}-${date}`,
-    Image: imageName[category],
-    Env: [
-      "HOME=/home/node",
-      "TERM=xterm-256color",
-      `OPENCLAW_GATEWAY_TOKEN=${token}`,
-    ],
-    ExposedPorts: {
-      "18789/tcp": {},
-    },
-    HostConfig: {
-      PortBindings: {
-        "18789/tcp": [{ HostPort: String(port) }],
-      },
-      Binds: [
-        `${configBaseDir}:/home/node/.openclaw`,
-        `${workspaceDir}:/home/node/.openclaw/workspace`,
-      ],
-      RestartPolicy: { Name: "unless-stopped" },
-      Init: true,
-    },
-    Cmd: [
-      "node",
-      "dist/index.js",
-      "gateway",
-      "--bind",
-      "lan",
-      "--port",
-      "18789",
-    ],
-  });
-
-  await container.start();
-  return container;
+function generateToken() {
+  return crypto.randomBytes(32).toString("hex");
 }
-
 
 /* -------------------------------------------------- */
 /* Deploy                                             */
@@ -170,12 +195,52 @@ export async function deploy(serviceId, category) {
   try {
     await client.query("BEGIN");
 
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = generateToken();
     const port = await getPort();
+    const res = await client.query(
+      `SELECT hostname FROM project_domains WHERE service_id = $1 LIMIT 1`,
+      [serviceId]
+    );
+    if (!res.rows.length) {
+      throw new Error(`No hostname found for serviceId: ${serviceId}`);
+    }
+    const hostname = res.rows[0].hostname;
+    const envRes = await client.query(
+      `SELECT name , value FROM envs WHERE service_id = $1`,
+      [serviceId]
+    );
+    if (!envRes.rows.length) {
+      throw new Error(`No hostname found for serviceId: ${serviceId}`);
+    }
+    const envs = envRes.rows
 
-    writeGatewayConfig(configBaseDir, token);
+    const providers = envRes.rows
+      .filter(row => row.name.endsWith("_API_KEY"))
+      .map(row => row.name.replace("_API_KEY", "").toLowerCase());
 
-    container = await createGatewayContainer({
+
+    const allowedChannels = [
+      "SLACK_BOT_TOKEN",
+      "SLACK_APP_TOKEN",
+      "DISCORD_BOT_TOKEN",
+      "TELEGRAM_BOT_TOKEN",
+      "WHATSAPP"
+    ];
+    const channelNames = Array.from(
+      new Set(
+        envRes.rows
+          .filter(row => allowedChannels.some(key => row.name.includes(key)))
+          .map(row => row.name.split("_")[0].toLowerCase())
+      )
+    );
+
+    const config = await generateConfig(providers, channelNames)
+    console.log(providers, channelNames);
+
+    writeGatewayConfig(configBaseDir, token, hostname, envs, config.agentsConfig, config.channels);
+
+
+    container = await createContainer({
       serviceId,
       category,
       token,
@@ -186,9 +251,9 @@ export async function deploy(serviceId, category) {
 
     await client.query(
       `UPDATE services
-       SET container_id = $1, status = $2
-       WHERE id = $3`,
-      [container.id, "Active", serviceId]
+       SET container_id = $1, status = 'Active'
+       WHERE id = $2`,
+      [container.id, serviceId]
     );
 
     await client.query(
@@ -209,22 +274,22 @@ export async function deploy(serviceId, category) {
            port = $3,
            ip = $4,
            service_types = $5,
-           status = $6
-       WHERE service_id = $7`,
+           status = 'Active'
+       WHERE service_id = $6`,
       [
         container.id,
         `http://${process.env.PUBLIC_IP}:${port}`,
         port,
         process.env.PUBLIC_IP,
         category,
-        "Active",
         serviceId,
       ]
     );
 
     await client.query("COMMIT");
 
-    return { gatewayContainerId: container.id };
+    return { containerId: container.id };
+
   } catch (err) {
     await client.query("ROLLBACK");
     await stopAndRemoveContainer(container?.id);
@@ -253,17 +318,57 @@ export async function redeploy(serviceId, category) {
 
     const oldContainerId = rows[0]?.container_id;
 
+    const token = generateToken();
     const port = await getPort();
 
-    // Stop old container first
-    if (oldContainerId) {
-      await stopAndRemoveContainer(oldContainerId);
-    }
 
-    // 🔥 Deploy OPENCLAW (not gateway)
-    newContainer = await createOpenClawContainer({
+    const res = await client.query(
+      `SELECT hostname FROM project_domains WHERE service_id = $1 LIMIT 1`,
+      [serviceId]
+    );
+    if (!res.rows.length) {
+      throw new Error(`No hostname found for serviceId: ${serviceId}`);
+    }
+    const hostname = res.rows[0].hostname;
+    const envRes = await client.query(
+      `SELECT name , value FROM envs WHERE service_id = $1`,
+      [serviceId]
+    );
+    if (!envRes.rows.length) {
+      throw new Error(`No hostname found for serviceId: ${serviceId}`);
+    }
+    const envs = envRes.rows
+
+    const providers = envRes.rows
+      .filter(row => row.name.endsWith("_API_KEY"))
+      .map(row => row.name.replace("_API_KEY", "").toLowerCase());
+
+    const allowedChannels = [
+      "SLACK_BOT_TOKEN",
+      "SLACK_APP_TOKEN",
+      "DISCORD_BOT_TOKEN",
+      "TELEGRAM_BOT_TOKEN",
+      "WHATSAPP"
+    ];
+    const channelNames = Array.from(
+      new Set(
+        envRes.rows
+          .filter(row => allowedChannels.some(key => row.name.includes(key)))
+          .map(row => row.name.split("_")[0].toLowerCase())
+      )
+    );
+
+    const config = await generateConfig(providers, channelNames)
+    console.log(providers, channelNames, envs);
+
+    writeGatewayConfig(configBaseDir, token, hostname, envs, config.agentsConfig, config.channels);
+
+
+
+    newContainer = await createContainer({
       serviceId,
       category,
+      token,
       port,
       configBaseDir,
       workspaceDir,
@@ -271,10 +376,23 @@ export async function redeploy(serviceId, category) {
 
     await client.query(
       `UPDATE services
-       SET container_id = $1, status = $2
-       WHERE id = $3`,
-      [newContainer.id, "Active", serviceId]
+       SET container_id = $1, status = 'Active'
+       WHERE id = $2`,
+      [newContainer.id, serviceId]
     );
+
+    // ✅ FIX: Update token in DB (previously missing)
+    await client.query(
+      `INSERT INTO envs (env_id, name, value, service_id)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (service_id, name)
+       DO UPDATE SET value = EXCLUDED.value`,
+      [uuidv4(), "OPENCLAW_GATEWAY_TOKEN", encryptEnvValue(token), serviceId]
+    );
+
+
+
+
 
     await client.query(
       `UPDATE servers
@@ -283,78 +401,68 @@ export async function redeploy(serviceId, category) {
            port = $3,
            ip = $4,
            service_types = $5,
-           status = $6
-       WHERE service_id = $7`,
+           status = 'Active'
+       WHERE service_id = $6`,
       [
         newContainer.id,
         `http://${process.env.PUBLIC_IP}:${port}`,
         port,
         process.env.PUBLIC_IP,
         category,
-        "Active",
         serviceId,
       ]
     );
-
     await client.query("COMMIT");
-
-    return { openclawContainerId: newContainer.id };
+    if (oldContainerId) {
+      await stopAndRemoveContainer(oldContainerId);
+    }
+    return { containerId: newContainer.id };
 
   } catch (err) {
     await client.query("ROLLBACK");
-
-    if (newContainer?.id) {
-      await stopAndRemoveContainer(newContainer.id);
-    }
-
+    await stopAndRemoveContainer(newContainer?.id);
     throw err;
   } finally {
     client.release();
   }
 }
 
-
+/* -------------------------------------------------- */
+/* Reconciliation                                     */
+/* -------------------------------------------------- */
 
 export async function reconcileServices() {
-  console.log(`[Cron] Starting service reconciliation check: ${new Date().toISOString()}`);
+  console.log(`[Cron] ${new Date().toISOString()} - Reconciliation started`);
 
   const client = await pool.connect();
 
   try {
-    // 1. Find services stuck in 'Provisioning' or 'Active' with no container_id
-    // You can adjust the 'interval' to define how long is "too long" (e.g., 5 minutes)
-    const { rows: stuckServices } = await client.query(
-      `SELECT id, category, status 
-             FROM services 
-             WHERE (status = 'Provisioning') 
-                OR (status = 'Active' AND container_id IS NULL)`
+    const { rows } = await client.query(
+      `SELECT id, category, status
+       FROM services
+       WHERE status = 'Provisioning'
+          OR (status = 'Active' AND container_id IS NULL)`
     );
 
-    if (stuckServices.length === 0) {
-      console.log("[Cron] All services are healthy.");
+    if (!rows.length) {
+      console.log("[Cron] No stuck services.");
       return;
     }
 
-    console.log(`[Cron] Found ${stuckServices.length} services requiring attention.`);
+    console.log(`[Cron] Found ${rows.length} services to reconcile.`);
 
-    for (const service of stuckServices) {
+    for (const service of rows) {
       try {
-        console.log(`[Cron] Redeploying stuck service: ${service.id} (Current Status: ${service.status})`);
-
-        // Trigger the existing redeploy logic
+        console.log(`[Cron] Redeploying ${service.id}`);
         await redeploy(service.id, service.category);
-
-        console.log(`[Cron] Successfully recovered service: ${service.id}`);
-      } catch (error) {
-
-        console.log(error);
-
-        console.error(`[Cron] Failed to recover service ${service.id}:`, error.message);
+        console.log(`[Cron] Recovered ${service.id}`);
+      } catch (err) {
+        console.error(`[Cron] Failed ${service.id}:`, err.message);
       }
     }
 
   } catch (err) {
-    console.error("[Cron] Error during reconciliation loop:", err);
+    console.error("[Cron] Reconciliation error:", err);
   } finally {
     client.release();
   }

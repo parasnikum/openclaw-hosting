@@ -4,8 +4,6 @@ import { deploy, redeploy } from "../docker/deploy.js";
 
 
 export async function buildService(req, res) {
-  console.log(req.params);
-
   const { serviceID } = req.params;
   const { category } = req.body;
   console.log(category);
@@ -22,6 +20,7 @@ export async function buildService(req, res) {
   `,
     [serviceID]
   );
+
 
   await deploy(serviceID, category);
   res.json({ result: result.rows });

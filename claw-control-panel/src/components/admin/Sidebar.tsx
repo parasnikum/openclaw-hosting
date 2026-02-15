@@ -57,8 +57,8 @@ export default function AdminSidebar() {
             <ShieldAlert className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">Zyrox</h2>
-            <p className="text-[10px] font-bold text-primary tracking-[0.3em] uppercase">Control</p>
+            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">BerryBox</h2>
+            <p className="text-[10px] font-bold text-primary tracking-[0.3em] uppercase">Cloud</p>
           </div>
         </div>
       </div>

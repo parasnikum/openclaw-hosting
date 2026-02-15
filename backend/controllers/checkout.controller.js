@@ -1,8 +1,10 @@
 const Razorpay = require('razorpay');
+const dotenv = require("dotenv")
+dotenv.config({ path: "../.env" })
 
 var instance = new Razorpay({
-    key_id: 'rzp_test_SEW6QmBtngxN1O',
-    key_secret: 'v0bjd1V625sMXzYbc0Jy6SVc',
+    key_id: process.env.RAZORPAY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 exports.createOrder = async (req, res) => {
@@ -16,6 +18,5 @@ exports.createOrder = async (req, res) => {
             key2: "value2"
         }
     })
-    console.log("Create Order: ", data);
     res.json({ "data": data })
 }

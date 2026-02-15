@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Play, Square, RefreshCw, Settings,
   Activity, Cpu, HardDrive, ArrowUpRight, Key,
-  Loader2, Save, LayoutDashboard, Globe, Eye, EyeOff, Copy, Plus, Trash2
+  Loader2, Save, LayoutDashboard, Globe, Eye, EyeOff, Copy, Plus, Trash2, Lock
 } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ export default function InstanceDetail() {
         const mappedEnvs = Object.entries(data.env || {}).map(([k, v]) => ({
           key: k,
           value: v,
-          isHidden: true // Default to hidden for security
+          isHidden: true 
         }));
         setEnvVars(mappedEnvs);
       }
@@ -47,20 +47,6 @@ export default function InstanceDetail() {
     const newEnvs = [...envVars];
     newEnvs[index].isHidden = !newEnvs[index].isHidden;
     setEnvVars(newEnvs);
-  };
-
-  const updateEnv = (index, field, value) => {
-    const newEnvs = [...envVars];
-    newEnvs[index][field] = value;
-    setEnvVars(newEnvs);
-  };
-
-  const addEnvRow = () => {
-    setEnvVars([...envVars, { key: '', value: '', isHidden: false }]);
-  };
-
-  const removeEnvRow = (index) => {
-    setEnvVars(envVars.filter((_, i) => i !== index));
   };
 
   const copyToClipboard = (text) => {
@@ -109,7 +95,6 @@ export default function InstanceDetail() {
 
   if (!instance) return <div className="p-10 text-center">Instance not found.</div>;
 
-  // Normalizing status for logic
   const isRunning = instance.status?.toLowerCase() === 'active';
 
   return (
@@ -130,7 +115,6 @@ export default function InstanceDetail() {
           </div>
         </div>
 
-        {/* CONTROLS SECTION */}
         <div className="flex flex-wrap items-center gap-2">
           <Button
             onClick={openOpenclawUI}
@@ -140,35 +124,6 @@ export default function InstanceDetail() {
             <ArrowUpRight className="h-4 w-4" />
             Visit Dashboard
           </Button>
-
-          {/* <div className="h-10 w-[1px] bg-border mx-2 hidden sm:block" /> */}
-          {/* <Button
-            size="default"
-            disabled={isActionLoading}
-            className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 px-6 shadow-lg shadow-emerald-600/20"
-            onClick={() => handlePowerAction('start')}
-          >
-            <Play className="h-4 w-4 mr-2 fill-current" /> Start
-          </Button>
-          <Button
-            variant="destructive"
-            size="default"
-            disabled={isActionLoading}
-            className="rounded-xl font-bold h-11 px-6 shadow-lg shadow-destructive/20"
-            onClick={() => handlePowerAction('stop')}
-          >
-            <Square className="h-4 w-4 mr-2 fill-current" /> Stop
-          </Button>
-
-          <Button
-            variant="outline"
-            size="default"
-            disabled={isActionLoading}
-            className="rounded-xl font-bold h-11 px-6 bg-background border-border"
-            onClick={() => handlePowerAction('restart')}
-          >
-            <RefreshCw className={cn("h-4 w-4 mr-2", isActionLoading && "animate-spin")} /> Restart
-          </Button> */}
         </div>
       </div>
 
@@ -183,7 +138,6 @@ export default function InstanceDetail() {
         <TabsContent value="metrics" className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard icon={Activity} label="Status" value={instance.status} color="text-emerald-500" bgColor="bg-emerald-500/10" />
-            {/* <StatCard icon={Globe} label="Endpoint" value={instance.hostname || ""} color="text-blue-500" bgColor="bg-blue-500/10" /> */}
             <StatCard icon={Cpu} label="vCPU" value={instance.plan_config?.cpu} color="text-orange-500" bgColor="bg-orange-500/10" />
             <StatCard icon={HardDrive} label="Memory" value={instance.plan_config?.ram} color="text-purple-500" bgColor="bg-purple-500/10" />
           </div>
@@ -207,27 +161,7 @@ export default function InstanceDetail() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[2rem] border-border/50 bg-slate-950 text-emerald-400 font-mono shadow-xl overflow-hidden">
-              <CardHeader className="border-b border-white/5 bg-white/5 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <CardTitle className="text-[10px] uppercase tracking-[0.2em]">Real-time Container Logs</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-5 text-[11px] space-y-1.5 h-48 overflow-y-auto custom-scrollbar leading-relaxed">
-                <div className="opacity-40 select-none"># Container ID: {instance.container_id}</div>
-                <div className="text-emerald-500/70 select-none">[SYSTEM] Connected to node stream...</div>
-                <div className="h-2" />
-                <div>[STDOUT] Application starting...</div>
-                <div>[STDOUT] Environment: Production</div>
-                <div className="text-blue-400">[DEBUG] Internal Port: 8080 mapped to {instance.hostname?.split(':').pop()}</div>
-                {isRunning ? (
-                  <div className="text-emerald-400 font-bold uppercase mt-2">● Service is online and healthy</div>
-                ) : (
-                  <div className="text-rose-500 font-bold uppercase mt-2">○ Service is currently offline</div>
-                )}
-              </CardContent>
-            </Card>
+            
           </div>
         </TabsContent>
 
@@ -236,24 +170,9 @@ export default function InstanceDetail() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
               <div className="space-y-1">
                 <h2 className="text-xl font-black flex items-center gap-2">
-                  <Key className="h-6 w-6 text-primary" /> Configuration
+                  <Lock className="h-6 w-6 text-primary" /> Configuration <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Read Only</span>
                 </h2>
-                <p className="text-sm text-muted-foreground">Variables are injected into the container on start/restart.</p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={addEnvRow}
-                  className="rounded-xl h-11 gap-2 font-bold px-4 border-dashed"
-                >
-                  <Plus className="h-4 w-4" /> Add Variable
-                </Button>
-                <Button
-                  onClick={() => toast.success("Saving updated configuration...")}
-                  className="rounded-xl h-11 gap-2 font-bold px-8 shadow-lg shadow-primary/20"
-                >
-                  <Save className="h-4 w-4" /> Save Config
-                </Button>
+                <p className="text-sm text-muted-foreground">Active environment variables for this instance.</p>
               </div>
             </div>
 
@@ -267,25 +186,21 @@ export default function InstanceDetail() {
 
               {envVars.length > 0 ? envVars.map((item, index) => (
                 <div key={index} className="grid grid-cols-12 gap-3 items-center group">
-                  {/* KEY INPUT */}
                   <div className="col-span-4">
                     <Input
+                      readOnly
                       value={item.key}
-                      placeholder="e.g. API_KEY"
-                      onChange={(e) => updateEnv(index, 'key', e.target.value.toUpperCase())}
-                      className="h-12 font-mono text-xs font-bold rounded-xl bg-muted/30 border-border/50"
+                      className="h-12 font-mono text-xs font-bold rounded-xl bg-muted/20 border-border/30 cursor-default focus-visible:ring-0"
                     />
                   </div>
 
-                  {/* VALUE INPUT CONTAINER */}
                   <div className="col-span-8 flex items-center gap-2 relative">
                     <div className="relative flex-1">
                       <Input
+                        readOnly
                         type={item.isHidden ? "password" : "text"}
                         value={item.value}
-                        placeholder="Value"
-                        onChange={(e) => updateEnv(index, 'value', e.target.value)}
-                        className="h-12 font-mono text-xs rounded-xl bg-muted/30 border-border/50 pr-24"
+                        className="h-12 font-mono text-xs rounded-xl bg-muted/20 border-border/30 pr-24 cursor-default focus-visible:ring-0"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <Button
@@ -306,23 +221,11 @@ export default function InstanceDetail() {
                         </Button>
                       </div>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-10 rounded-xl text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeEnvRow(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               )) : (
                 <div className="text-center py-20 bg-muted/10 rounded-[2rem] border border-dashed border-border/50">
-                  <p className="text-sm text-muted-foreground italic">No environment variables defined.</p>
-                  <Button variant="link" onClick={addEnvRow} className="mt-2 text-primary font-bold">
-                    Click here to add your first variable
-                  </Button>
+                  <p className="text-sm text-muted-foreground italic">No environment variables defined for this node.</p>
                 </div>
               )}
             </div>

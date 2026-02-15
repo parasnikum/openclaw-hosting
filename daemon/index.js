@@ -3,7 +3,7 @@ import http from "http";
 import servicesRoutes from "./routes/services.routes.js";
 import containersRoutes from "./routes/containers.routes.js";
 // import { initWebSocket } from "./ws/server.js";
-import "./queue/worker.js";
+// import "./queue/worker.js";
 // import "./docker/watcher.js";
 import dotenv from "dotenv"
 dotenv.config();
@@ -11,7 +11,7 @@ import {reconcileServices} from "./docker/deploy.js"
 setInterval(() => {
   console.log("Running reconcileServices...");
   reconcileServices();
-}, 30 * 1000);
+}, 5 * 1000);
 
 const app = express();
 const server = http.createServer(app);

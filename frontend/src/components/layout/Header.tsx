@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  ChevronDown, 
-  Bell, 
-  Sun, 
-  Moon, 
+import {
+  ChevronDown,
+  Bell,
+  Sun,
+  Moon,
   Monitor,
   User,
   Settings,
@@ -21,7 +21,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 const instances = [
   { id: '1', name: 'Production Bot', status: 'running' },
   { id: '2', name: 'Dev Bot', status: 'stopped' },
@@ -30,6 +31,7 @@ const instances = [
 
 export function Header() {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const navigate = useNavigate();
   const { toggle } = useSidebar();
   const [selectedInstance, setSelectedInstance] = useState(instances[0]);
 
@@ -38,22 +40,26 @@ export function Header() {
     dark: <Moon className="h-4 w-4" />,
     system: <Monitor className="h-4 w-4" />,
   };
-
+  const handleLogout = () => {
+    Cookies.remove('jwt');             // Clear the cookie
+    navigate('/login', { replace: true }); // Redirect to login
+  };
   return (
     <header className="h-header border-b border-border bg-card px-4 flex items-center justify-between sticky top-0 z-50">
       <div className="flex items-center gap-3">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-8 w-8"
           onClick={toggle}
         >
           <Menu className="h-4 w-4" />
         </Button>
-        
+
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-semibold text-sm">O</span>
+          <div className="h-7 w-7 rounded-md  flex items-center justify-center">
+            {/* <span className="text-primary-foreground font-semibold text-sm">O</span> */}
+            <img src="openclaw.png" alt="BerryBox.cloud Logo" />
           </div>
           <span className="font-semibold text-foreground hidden sm:block">BerryBox Cloud</span>
         </div>
@@ -124,23 +130,23 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="font-normal">
+            {/* <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col">
                 <span className="font-medium text-sm">John Doe</span>
                 <span className="text-xs text-muted-foreground">john@example.com</span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2">
+            <DropdownMenuSeparator /> */}
+            {/* <DropdownMenuItem className="gap-2">
               <User className="h-4 w-4" />
               Profile
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2">
               <Settings className="h-4 w-4" />
               Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 text-destructive">
+            </DropdownMenuItem> */}
+            {/* <DropdownMenuSeparator /> */}
+            <DropdownMenuItem className="gap-2 text-destructive" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
               Log out
             </DropdownMenuItem>

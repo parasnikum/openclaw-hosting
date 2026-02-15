@@ -8,7 +8,7 @@ export function RazorpayCheckout({
   projectName,
   orderId,
 }: {
-  amount: number; // in paise
+  amount: number; 
   projectName: string;
   orderId: string;
 }) {
@@ -17,15 +17,14 @@ export function RazorpayCheckout({
 
   const handlePayment = () => {
     const options: RazorpayOrderOptions = {
-      key: import.meta.env.VITE_RAZORPAY_KEY, // ✅ keep key in env
+      key: import.meta.env.VITE_RAZORPAY_KEY, 
       amount,
       currency: "INR",
-      name: "Your Company",
+      name: "BerryBox Cloud",
       description: `Deployment for ${projectName}`,
-      order_id: orderId, // generated from backend
+      order_id: orderId, 
       handler: (response) => {
         console.log("Payment success:", response);
-
         navigate(
           `/checkout/success?name=${encodeURIComponent(projectName)}`
         );

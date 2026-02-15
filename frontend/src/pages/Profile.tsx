@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Shield, Key, Palette, Bell, Save } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,19 +10,49 @@ import { Separator } from '@/components/ui/separator';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 
-type Section = 'profile' | 'security' | 'api' | 'appearance' | 'notifications';
+type Section = 'profile' | 'security' | 'appearance' | 'notifications';
 
-export default function Settings() {
+export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<Section>('profile');
-
+  const [profile, setprofile] = useState<{ email: string, fname: string, lname: string }>();
   const menuItems = [
     { id: 'profile' as Section, label: 'Profile', icon: User },
     { id: 'security' as Section, label: 'Security', icon: Shield },
-    { id: 'api' as Section, label: 'API Keys', icon: Key },
     { id: 'appearance' as Section, label: 'Appearance', icon: Palette },
-    { id: 'notifications' as Section, label: 'Notifications', icon: Bell },
+    // { id: 'notifications' as Section, label: 'Notifications', icon: Bell },
   ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/auth/profile`,
+          {
+            method: "POST", 
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: "user@example.com",
+            }),
+          }
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (data.profile) {
+          setProfile(data.profile);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 py-4 animate-fade-in">
@@ -40,8 +70,8 @@ export default function Settings() {
               onClick={() => setActiveTab(item.id)}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all",
-                activeTab === item.id 
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                activeTab === item.id
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
@@ -72,7 +102,7 @@ export default function Settings() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="john@example.com" className="bg-background" />
+                  <Input id="email" type="email" defaultValue="john@example.com" value={profile.email} className="bg-background" />
                 </div>
                 <Button className="gap-2 rounded-xl">
                   <Save className="h-4 w-4" /> Save Profile
@@ -105,19 +135,19 @@ export default function Settings() {
                   </div>
                   <Button variant="secondary" className="rounded-xl">Update Password</Button>
                 </div>
-                <Separator />
+                {/* <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>Two-Factor Auth</Label>
                     <p className="text-xs text-muted-foreground">Require a code via email.</p>
                   </div>
                   <Switch />
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           )}
 
-          {activeTab === 'api' && (
+          {/* {activeTab === 'api' && (
             <Card className="border-none shadow-sm bg-card/50">
               <CardHeader>
                 <CardTitle>API Access</CardTitle>
@@ -136,7 +166,7 @@ export default function Settings() {
                 <Button variant="outline" className="w-full border-dashed rounded-xl">+ Create New Key</Button>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           {activeTab === 'appearance' && (
             <Card className="border-none shadow-sm bg-card/50">

@@ -12,9 +12,9 @@ const menuGroups = [
   {
     group: "Core Fleet",
     items: [
-      { name: "Global Overview", icon: LayoutDashboard, path: "/admin/dashboard" },
+      // { name: "Global Overview", icon: LayoutDashboard, path: "/admin/dashboard" },
       { name: "User Directory", icon: Users, path: "/admin/users" },
-      { name: "Instance Fleet", icon: Server, path: "/admin/services" },
+      // { name: "Instance Fleet", icon: Server, path: "/admin/services" },
     ]
   },
   {
@@ -22,8 +22,7 @@ const menuGroups = [
     items: [
       { name: "Cluster Nodes", icon: Zap, path: "/admin/nodes" },
       { name: "Hosting Plans", icon: Box, path: "/admin/plans" },
-      { name: "System Envs", icon: Key, path: "/admin/envs" },
-      { name: "Backup Vaults", icon: Database, path: "/admin/backups" },
+      // { name: "Backup Vaults", icon: Database, path: "/admin/backups" },
     ]
   },
   {
@@ -35,13 +34,6 @@ const menuGroups = [
       { name: "Global Invoices", icon: CreditCard, path: "/admin/invoices" },
     ]
   },
-  {
-    group: "Security",
-    items: [
-      { name: "Auth Logs", icon: ShieldCheck, path: "/admin/auth-logs" },
-      { name: "Global Config", icon: Settings, path: "/admin/settings" },
-    ]
-  }
 ];
 
 export default function AdminSidebar() {
@@ -57,7 +49,7 @@ export default function AdminSidebar() {
             <ShieldAlert className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">Zyrox</h2>
+            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">BerryBox</h2>
             <p className="text-[10px] font-bold text-primary tracking-[0.3em] uppercase">Control</p>
           </div>
         </div>

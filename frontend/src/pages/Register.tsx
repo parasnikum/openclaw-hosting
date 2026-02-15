@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   User, Mail, Lock, Zap, ArrowRight, ChevronLeft,
-  ShieldCheck, Moon, Sun 
+  ShieldCheck, Moon, Sun
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
+import { isAuthenticated } from '@/lib/auth';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function RegisterPage() {
 
   // 1. Form State
   const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
     username: '',
     email: '',
     password: '',
@@ -30,6 +33,16 @@ export default function RegisterPage() {
     root.classList.add(theme);
   }, [theme]);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isLoggedin = await isAuthenticated(); // Ensure this handles the cookie check correctly
+      if (isLoggedin) {
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -37,7 +50,7 @@ export default function RegisterPage() {
   // 2. Handle Registration
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Simple Validation
     if (formData.password !== formData.confirmPassword) {
       return toast.error("Passwords do not match");
@@ -52,11 +65,13 @@ export default function RegisterPage() {
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
         }),
       });
       console.log(`${import.meta.env.VITE_API_URL}/auth/register`);
-      
+
       const data = await response.json();
       console.log(response);
 
@@ -76,7 +91,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-background to-background transition-colors duration-500">
-      
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px] dark:bg-purple-500/5" />
@@ -97,7 +112,7 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-[480px] space-y-6 relative z-10 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div 
+          <div
             className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2 cursor-pointer transition-transform hover:scale-110 group"
             onClick={() => navigate('/login')}
           >
@@ -124,17 +139,49 @@ export default function RegisterPage() {
 
           <CardContent className="px-8">
             <form onSubmit={handleRegister} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="first_name" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">First Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="first_name"
+                      type="text"
+                      placeholder="Alex"
+                      value={formData.first_name}
+                      onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="last_name" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Last Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="last_name"
+                      type="text"
+                      placeholder="Warner"
+                      value={formData.last_name}
+                      onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="username" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Username</Label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="username" 
-                    placeholder="paras_developer" 
+                  <Input
+                    id="username"
+                    placeholder="alex45"
                     value={formData.username}
-                    onChange={(e) => setFormData({...formData, username: e.target.value})}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm" 
-                    required 
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                    required
                   />
                 </div>
               </div>
@@ -143,14 +190,14 @@ export default function RegisterPage() {
                 <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Work Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="alex@workspace.io" 
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="alex@workspace.io"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm" 
-                    required 
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                    required
                   />
                 </div>
               </div>
@@ -160,14 +207,14 @@ export default function RegisterPage() {
                   <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="••••••••" 
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm" 
-                      required 
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -175,14 +222,14 @@ export default function RegisterPage() {
                   <Label htmlFor="confirm" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Confirm</Label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="confirm" 
-                      type="password" 
-                      placeholder="••••••••" 
+                    <Input
+                      id="confirm"
+                      type="password"
+                      placeholder="••••••••"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm" 
-                      required 
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -195,9 +242,9 @@ export default function RegisterPage() {
                 </Label>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl font-bold text-base transition-all shadow-lg shadow-primary/20 mt-4" 
+              <Button
+                type="submit"
+                className="w-full h-12 rounded-xl font-bold text-base transition-all shadow-lg shadow-primary/20 mt-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -212,7 +259,7 @@ export default function RegisterPage() {
           <CardFooter className="flex flex-col space-y-4 bg-muted/10 border-t border-border/30 pt-6 pb-8 mt-6">
             <p className="text-center text-xs text-muted-foreground font-medium">
               Already have an active node?{' '}
-              <button 
+              <button
                 onClick={() => navigate('/login')}
                 className="text-primary font-black hover:underline underline-offset-4"
               >
@@ -222,9 +269,9 @@ export default function RegisterPage() {
           </CardFooter>
         </Card>
 
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="w-full text-muted-foreground hover:text-foreground text-[10px] font-black uppercase tracking-[0.2em] h-10"
           onClick={() => navigate('/login')}
         >

@@ -39,6 +39,8 @@ exports.createService = async (req, res) => {
 
   try {
     const { service_name, plan_id, config, payment_mode } = req.body;
+    console.log(JSON.stringify(req.body));
+
     const user_id = req.user.userid;
 
     // 1. Fetch plan (single source of truth)
@@ -70,31 +72,73 @@ exports.createService = async (req, res) => {
     // 3. Create Service
     const serviceId = uuidv4();
     await client.query(
-      `INSERT INTO services
-       (id, service_name, plan_id, user_id, purchased_on, renewal_date, status, category)
-       VALUES ($1, $2, $3, $4, NOW(), NOW() + INTERVAL '30 days', 'Provisioning', 'openclaw')`,
+      `INSERT INTO services (id, service_name, plan_id, user_id, purchased_on, renewal_date, status, category)
+   VALUES ($1, $2, $3, $4, NOW(), NOW() + INTERVAL '30 days', 'Provisioning', 'openclaw')`,
       [serviceId, service_name, plan_id, user_id]
     );
 
-    // 4. Create Server (linked to service)
     const serverId = uuidv4();
     await client.query(
-      `INSERT INTO servers
-       (id, server_name, service_id, on_node, ip, port, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'Provisioning')`,
-      [serverId, service_name, serviceId, targetNode, '127.0.0.1', '3000']
+      `INSERT INTO servers (id, server_name, service_id, on_node, ip, port, status)
+   VALUES ($1, $2, $3, $4, $5, $6, 'Provisioning')`,
+      [serverId, service_name, serviceId, targetNode, targetNode.ip, '3000']
     );
 
     // 5. Save environment & overrides ONLY
-    for (const [name, value] of Object.entries(config.env)) {
-      const encryptedValue = encryptEnvValue(value);
+    if (config.env && config.env.ai_credentials) {
+      const credentials = config.env.ai_credentials; // This is the [{provider, apiKey}] array
 
+      for (const item of credentials) {
+        // We format the name: e.g., "OPENAI_API_KEY"
+        const envName = `${item.provider.toUpperCase().replace(/-/g, '_')}_API_KEY`;
+        const encryptedValue = encryptEnvValue(item.apiKey);
+
+        await client.query(
+          `INSERT INTO envs (env_id, service_id, name, value)
+       VALUES ($1, $2, $3, $4)`,
+          [uuidv4(), serviceId, envName, encryptedValue]
+        );
+      }
+    }
+
+    async function upsertEnv(name, value) {
+      const encryptedValue = encryptEnvValue(value);
       await client.query(
         `INSERT INTO envs (env_id, service_id, name, value)
-            VALUES ($1, $2, $3, $4)`,
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (service_id, name)
+     DO UPDATE SET value = EXCLUDED.value`,
         [uuidv4(), serviceId, name, encryptedValue]
       );
     }
+
+    if (config?.env?.ai_credentials?.length) {
+      for (const item of config.env.ai_credentials) {
+        if (!item.provider || !item.apiKey) continue;
+        const envName = `${item.provider.toUpperCase().replace(/-/g, "_")}_API_KEY`;
+        await upsertEnv(envName, item.apiKey);
+      }
+    }
+
+    if (config?.env?.channels) {
+      const channels = config.env.channels;
+
+      const slack = channels["slack-socket"] || channels["slack-http"];
+      if (slack?.botToken) await upsertEnv("SLACK_BOT_TOKEN", slack.botToken);
+      if (slack?.appToken) await upsertEnv("SLACK_APP_TOKEN", slack.appToken);
+      if (channels["discord"]?.token) await upsertEnv("DISCORD_BOT_TOKEN", channels["discord"].token);
+      if (channels["telegram"]?.botToken) await upsertEnv("TELEGRAM_BOT_TOKEN", channels["telegram"].botToken);
+      if (channels["whatsapp"]) await upsertEnv("WHATSAPP", channels["whatsapp"].allowFrom);
+    }
+
+    for (const [name, value] of Object.entries(config.env)) {
+      if (["ai_credentials", "channels"].includes(name)) continue;
+
+      const safeValue = typeof value === "string" ? value : JSON.stringify(value);
+      await upsertEnv(name.toUpperCase(), safeValue);
+    }
+
+
 
     // 6. Invoice
     const invoiceId = uuidv4();
@@ -113,41 +157,67 @@ exports.createService = async (req, res) => {
       [uuidv4(), serviceId, user_id, plan.price, payment_mode, `ORDER-${Date.now()}`]
     );
     const subdomain = `${uuidv4().split("-")[0]}-openclaw`;
-    // 7. Transaction
+
+    // 7. Domain
     await client.query(
       `INSERT INTO project_domains
        (id, service_id, domain_type, hostname, ssl_enabled, ssl_status)
        VALUES ($1, $2, $3, $4, $5,$6)`,
-      [uuidv4(), serviceId, "subdomain", subdomain, true, `Provisining`]
+      [uuidv4(), serviceId, "subdomain", subdomain, true, `Provisioning`]
     );
-
 
     await client.query("COMMIT");
 
     const node = await getAvailableNode();
 
-    // 2. Use its IP and port when creating the service
-    const response = await fetch(`http://${node.ip}:${node.port}/api/services/${serviceId}/build`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category: "openclaw" }),
-      credentials: "include"
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      console.log(err);
-
-      throw new Error(`Failed to build service: ${err}`);
-    }
-
-    return res.status(201).json({
+    // Send success immediately
+    res.status(201).json({
       status: "Success",
-      msg: `Provisioned on node ${node.node_id}. Next renewal in 30 days.`,
+      msg: `Service created successfully. Provisioning has started.`,
       serviceId,
       node: { ip: node.ip, port: node.port }
     });
 
+    // 🔥 Run build in background (do not await)
+    (async () => {
+      try {
+        const node = await getAvailableNode();
+
+        const response = await fetch(
+          `http://${node.ip}:${node.port}/api/services/${serviceId}/build`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ category: "openclaw", config: config })
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.text();
+          console.error("Background build failed:", err);
+
+          await pool.query(
+            `UPDATE services SET status = 'Failed' WHERE id = $1`,
+            [serviceId]
+          );
+
+          return;
+        }
+
+        await pool.query(
+          `UPDATE services SET status = 'Active' WHERE id = $1`,
+          [serviceId]
+        );
+
+      } catch (err) {
+        console.error("Background build error:", err);
+
+        await pool.query(
+          `UPDATE services SET status = 'Build Failed' WHERE id = $1`,
+          [serviceId]
+        );
+      }
+    })();
 
   } catch (error) {
     await client.query("ROLLBACK");
@@ -194,8 +264,6 @@ exports.updateServiceConfig = async (req, res) => {
 exports.getUserServices = async (req, res) => {
   try {
     const user_id = req.user.userid;
-    console.log(user_id);
-    
     // Join with plans to show plan name and price in the list
     const query = `
             SELECT s.*, p.plan_name, p.price, p.category 
@@ -265,7 +333,7 @@ exports.getServiceDetail = async (req, res) => {
     if (serviceResult.rows.length === 0) {
       return res.status(404).json({ msg: "Service not found." });
     }
-  
+
 
     return res.status(200).json(service);
   } catch (error) {

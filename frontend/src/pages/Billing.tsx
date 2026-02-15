@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
 import {
-  CalendarClock, History, CreditCard, ArrowRight, 
-  ShieldCheck, AlertTriangle, Loader2, Zap, 
-  Copy, Check, Server
+  CalendarClock, History, CreditCard, ArrowRight,
+  ShieldCheck, AlertTriangle, Loader2, Zap,
+  Copy, Check, Server,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -51,8 +59,8 @@ export default function Billing() {
   };
 
   const formatExactTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('en-US', { 
-      month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    return new Date(dateStr).toLocaleString('en-US', {
+      month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
   };
 
@@ -112,21 +120,20 @@ export default function Billing() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 py-10 px-4 animate-in fade-in duration-500">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-8">
         <div className="space-y-1">
           <h1 className="text-3xl font-black tracking-tight">Billing & Assets</h1>
-          <p className="text-sm text-muted-foreground">Manage recurring subscriptions and check logs.</p>
+          <p className="text-sm text-muted-foreground font-medium">Manage recurring subscriptions and check service logs.</p>
         </div>
 
         <div className={cn(
-          "flex items-center gap-2 px-5 py-2 rounded-2xl border transition-colors",
+          "flex items-center gap-2 px-5 py-2 rounded-2xl border transition-all duration-500 shadow-sm",
           services.some(s => getDaysRemaining(s.renewal_date) <= 15)
             ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
             : "bg-green-500/10 border-green-500/20 text-green-600"
         )}>
           {services.some(s => getDaysRemaining(s.renewal_date) <= 15) ? (
-            <><AlertTriangle className="h-4 w-4" /> <span className="text-[10px] font-black uppercase tracking-widest">Action Required</span></>
+            <><AlertTriangle className="h-4 w-4 animate-bounce" /> <span className="text-[10px] font-black uppercase tracking-widest">Action Required</span></>
           ) : (
             <><ShieldCheck className="h-4 w-4" /> <span className="text-[10px] font-black uppercase tracking-widest">Status Healthy</span></>
           )}
@@ -134,9 +141,8 @@ export default function Billing() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Subscriptions Section */}
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 px-2">
             <CalendarClock className="h-4 w-4" /> Active Subscriptions
           </h2>
 
@@ -147,47 +153,91 @@ export default function Billing() {
               const isCritical = daysLeft <= 3;
 
               return (
+                /* REMOVED overflow-hidden FROM CARD TO FIX TOOLTIP CLIPPING */
                 <Card key={service.id} className={cn(
-                  "relative overflow-hidden transition-all duration-300 border-border/50 bg-card/40 backdrop-blur-sm rounded-[2rem]",
+                  "relative transition-all duration-300 border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem]",
                   isCritical ? "border-red-500/50" : isUrgent ? "border-amber-500/50" : "hover:border-primary/40"
                 )}>
-                  <CardContent className="p-6">
+                  <CardContent className="p-7">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                       <div className="flex items-center gap-5">
                         <div className={cn(
-                          "h-14 w-14 rounded-2xl flex items-center justify-center border shadow-sm",
-                          isCritical ? "bg-red-500 text-white" : isUrgent ? "bg-amber-500 text-white" : "bg-primary/5 text-primary border-primary/20"
+                          "h-14 w-14 rounded-[1.25rem] flex items-center justify-center border shadow-sm transition-transform hover:scale-105",
+                          isCritical ? "bg-red-500 text-white shadow-red-500/20" : isUrgent ? "bg-amber-500 text-white shadow-amber-500/20" : "bg-primary/5 text-primary border-primary/20"
                         )}>
-                          <Zap className="h-7 w-7" />
+                          <Zap className={cn("h-7 w-7", isUrgent && "fill-current")} />
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-foreground leading-none mb-1.5">{service.service_name}</p>
-                          <div className="flex items-center gap-2 text-[10px] font-black uppercase">
+                          <p className="text-xl font-black text-foreground leading-none mb-2">{service.service_name}</p>
+                          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider">
                             <span className={cn(
-                              "px-2 py-0.5 rounded-md",
-                              isCritical ? "bg-red-500/20 text-red-600" : isUrgent ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground"
+                              "px-3 py-1 rounded-full",
+                              isCritical ? "bg-red-500/20 text-red-600" : isUrgent ? "bg-amber-500/20 text-amber-600" : "bg-green-500/10 text-green-600"
                             )}>
-                              {daysLeft <= 0 ? "Expired" : `${daysLeft} Days Left`}
+                              {daysLeft <= 0 ? "Expired" : `${daysLeft} Days Remaining`}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-8 sm:border-l sm:pl-8 border-border/50">
+                      <div className="flex items-center justify-between sm:justify-end gap-8 sm:border-l sm:pl-10 border-border/50">
                         <div className="text-right">
-                          <p className="text-2xl font-black text-foreground">${service.price || '0.00'}</p>
-                          <p className="text-[9px] uppercase text-muted-foreground font-black tracking-widest">Monthly</p>
+                          <p className="text-2xl font-black text-foreground tracking-tighter">${service.price || '0.00'}</p>
+                          <p className="text-[9px] uppercase text-muted-foreground font-black tracking-widest opacity-70">Monthly Cycle</p>
                         </div>
-                        <Button
-                          onClick={() => handleRenew(service.id, service.plan_id)}
-                          disabled={!!isRenewing || isRzpLoading}
-                          className={cn(
-                            "rounded-2xl h-12 px-8 font-black transition-all active:scale-95",
-                            isUrgent ? "bg-primary" : "bg-muted text-muted-foreground hover:bg-primary hover:text-white"
-                          )}
-                        >
-                          {isRenewing === service.id ? <Loader2 className="animate-spin h-4 w-4" /> : "Renew"}
-                        </Button>
+
+                        {daysLeft <= 15 ? (
+                          <Button
+                            onClick={() => handleRenew(service.id, service.plan_id)}
+                            disabled={!!isRenewing || isRzpLoading}
+                            className={cn(
+                              "rounded-2xl h-12 px-8 font-black transition-all active:scale-95 shadow-lg",
+                              isUrgent
+                                ? "bg-primary text-primary-foreground shadow-primary/30"
+                                : "bg-primary/90 text-primary-foreground"
+                            )}
+                          >
+                            {isRenewing === service.id ? <Loader2 className="animate-spin h-4 w-4" /> : "Renew Now"}
+                          </Button>
+                        ) : (
+                          <TooltipProvider delayDuration={100} skipDelayDuration={0}>
+                            <Tooltip>
+                              {/* 1. Added asChild and ensured no nested buttons to prevent click conflicts */}
+                              <TooltipTrigger asChild>
+                                <div
+                                  /* 2. Added ontouchstart to help some mobile browsers recognize the hit area */
+                                  onTouchStart={(e) => e.currentTarget.focus()}
+                                  className="flex items-center gap-2 bg-muted/30 px-5 py-3 rounded-2xl border border-border/50 cursor-help transition-all hover:bg-muted/50 active:bg-muted/80 group relative z-10 select-none"
+                                >
+                                  <CheckCircle2 className="h-4 w-4 text-green-500 transition-transform group-hover:scale-110" />
+                                  <span className="text-[11px] font-black uppercase text-muted-foreground tracking-tight">
+                                    Subscription Active
+                                  </span>
+                                  <Info className="h-3.5 w-3.5 text-primary animate-pulse" />
+                                </div>
+                              </TooltipTrigger>
+
+                              <TooltipContent
+                                side="top"
+                                sideOffset={10}
+                                /* 3. Added high z-index and fixed pointer events for mobile overlay */
+                                className="z-[9999] bg-popover border-border p-4 rounded-2xl shadow-2xl max-w-[240px] animate-in zoom-in-95 pointer-events-auto"
+                                /* 4. This ensures the tooltip closes when you tap outside on mobile */
+                                onPointerDownOutside={(e) => e.preventDefault()}
+                              >
+                                <div className="space-y-2">
+                                  <p className="text-[11px] leading-relaxed font-bold text-foreground">
+                                    Payment Restricted
+                                  </p>
+                                  <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
+                                    Renewal is unlocked when your instance has <span className="text-primary font-bold">15 days or less</span> remaining.
+                                    Currently you have <span className="text-foreground font-bold">{daysLeft} days</span> of runtime left.
+                                  </p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -197,50 +247,56 @@ export default function Billing() {
           </div>
         </div>
 
-        {/* Mini Transactions Sidebar */}
         <div className="space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recent Logs</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Recent Transactions</h3>
               <Link to="/transactions" className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:gap-2 transition-all group">
-                Full History <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                Full Logs <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
-            
-            <div className="space-y-2">
+
+            <div className="space-y-3">
               {transactions.slice(0, 5).map((tx) => (
-                <div key={tx.transaction_id} className="flex flex-col p-4 rounded-2xl bg-muted/20 border border-transparent hover:border-border/50 transition-all group">
-                  <div className="flex items-center justify-between mb-2">
+                <div key={tx.transaction_id} className="flex flex-col p-5 rounded-[1.5rem] bg-muted/20 border border-transparent hover:border-border/50 transition-all group shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold truncate text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
-                        <Server className="h-3 w-3" /> {tx.service_name || 'System Credit'}
+                      <p className="text-xs font-black truncate text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                        <Server className="h-3.5 w-3.5" /> {tx.service_name || 'Infrastructure Credit'}
                       </p>
-                      <p className="text-[9px] text-muted-foreground font-black uppercase">
+                      <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
                         {formatExactTime(tx.created_at)}
                       </p>
                     </div>
-                    <span className="text-sm font-black text-foreground">${tx.price}</span>
+                    <span className="text-sm font-black text-foreground tracking-tighter">${tx.price}</span>
                   </div>
-                  
-                  <div className="flex items-center justify-between pt-2 border-t border-border/10">
-                    <button 
+
+                  <div className="flex items-center justify-between pt-3 border-t border-border/10">
+                    <button
                       onClick={() => copyToClipboard(tx.transaction_id)}
-                      className="flex items-center gap-1 text-[8px] font-mono text-muted-foreground hover:text-primary"
+                      className="flex items-center gap-1.5 text-[8px] font-mono text-muted-foreground hover:text-primary transition-colors"
                     >
-                      ID: {tx.transaction_id.slice(0, 12)}... 
-                      {copiedId === tx.transaction_id ? <Check className="h-2 w-2 text-green-500" /> : <Copy className="h-2 w-2" />}
+                      ID: {tx.transaction_id.slice(0, 12).toUpperCase()}
+                      {copiedId === tx.transaction_id ? <Check className="h-2.5 w-2.5 text-green-500" /> : <Copy className="h-2.5 w-2.5" />}
                     </button>
                     <div className={cn(
-                      "h-1.5 w-1.5 rounded-full",
-                      tx.status === 'Paid' ? "bg-emerald-500 shadow-[0_0_8px_emerald]" : tx.status === 'Failed' ? "bg-red-500" : "bg-amber-500 animate-pulse"
-                    )} />
+                      "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase",
+                      tx.status === 'Paid' ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                    )}>
+                      <div className={cn(
+                        "h-1 w-1 rounded-full",
+                        tx.status === 'Paid' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-amber-500 animate-pulse"
+                      )} />
+                      {tx.status}
+                    </div>
                   </div>
                 </div>
               ))}
-              
+
               {transactions.length === 0 && (
-                <div className="text-center py-8 bg-muted/10 rounded-2xl border border-dashed text-xs text-muted-foreground">
-                  No logs found.
+                <div className="text-center py-12 bg-muted/10 rounded-[2rem] border border-dashed border-border/50 flex flex-col items-center gap-3">
+                  <History className="h-8 w-8 text-muted-foreground/30" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">No activity logged.</p>
                 </div>
               )}
             </div>

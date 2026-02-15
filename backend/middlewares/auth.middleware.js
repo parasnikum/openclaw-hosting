@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret_key";
 
 const verifyAuth = (req, res, next) => {
     const token = req.cookies?.jwt;
-    
+
     if (!token) {
         return res.status(401).json({
             authenticated: false,
@@ -23,7 +23,7 @@ const verifyAuth = (req, res, next) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            domain: ".zyroxhosting.in"
+            domain: ".berrybox.cloud"
         });
         return res.status(403).json({
             authenticated: false,
@@ -32,15 +32,12 @@ const verifyAuth = (req, res, next) => {
     }
 };
 
-
 const isAdmin = (req, res, next) => {
-    const adminEmails = ['admin@zyroxhosting.in', 'paras@zyrox.com' , 'adsad@gmail.com'];
-    if (req.user && adminEmails.includes(req.user.email)) {
+    if (req.user && req.user.role === "Admin") {
         next();
     } else {
         return res.status(403).json({ msg: "Access denied. Admins only." });
     }
 };
-
 
 module.exports = { verifyAuth, isAdmin };

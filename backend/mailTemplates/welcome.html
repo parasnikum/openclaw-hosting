@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to BerryBox Cloud</title>
+    <style>
+        /* Base Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #09090b;
+            /* Zinc 950 */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #fafafa;
+        }
+
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #09090b;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #121214;
+            border: 1px solid #27272a;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        /* Header / Logo Area */
+        .header {
+            padding: 40px 0;
+            text-align: center;
+            background: radial-gradient(circle at top, #3b82f615 0%, transparent 70%);
+        }
+
+        .logo-box {
+            display: inline-block;
+            background-color: #3b82f6;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 0 40px 40px 40px;
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: #ffffff;
+        }
+
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #a1a1aa;
+            /* Zinc 400 */
+            margin: 0 0 20px 0;
+        }
+
+        .username {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        /* Features Grid */
+        .feature-card {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Button */
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background-color: #3b82f6;
+            color: #ffffff !important;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #52525b;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #27272a;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="logo-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">BerryBox<span
+                        style="color: #3b82f6;">Cloud</span></div>
+            </div>
+
+            <div class="content">
+                <h1>Welcome to the node, <span class="username">{{username}}</span>.</h1>
+                <p>Your developer account has been successfully provisioned. You are now part of the BerryBox Cloud
+                    network—a high-performance ecosystem designed for modern application deployment.</p>
+
+                <div class="feature-card">
+                    <span class="feature-title">Instant Provisioning</span>
+                    <p style="margin:0; font-size: 13px;">Deploy Linux instances and containerized nodes in seconds with
+                        our optimized hardware stack.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-title">Developer-First Tooling</span>
+                    <p style="margin:0; font-size: 13px;">Full API access, custom protocols, and a dashboard built for
+                        speed and clarity.</p>
+                </div>
+
+                <div class="button-container">
+                    <a href="https://berrybox.cloud/dashboard" class="btn">Initialize Dashboard</a>
+                </div>
+
+                <div class="divider"></div>
+
+                <p style="font-size: 13px; text-align: center;">
+                    If you didn't create this account, you can safely ignore this email or contact our security protocol
+                    team.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 BerryBox Cloud Infrastructure.<br>
+            Provisioned for High-Performance Environments.
+        </div>
+    </div>
+</body>
+
+</html>

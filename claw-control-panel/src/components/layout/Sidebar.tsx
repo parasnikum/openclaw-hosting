@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/instances', icon: Server, label: 'Instances' },
   { to: '/create', icon: Plus, label: 'Create Instance' },
   { to: '/billing', icon: CreditCard, label: 'Billing' },

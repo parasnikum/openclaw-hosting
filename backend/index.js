@@ -3,24 +3,23 @@ const cors = require("cors"); // 1. Import CORS
 const app = express();
 const { connect } = require("./config/db");
 const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv")
+const dotenv = require("dotenv");
+const { startServiceProvisioningCron } = require("./cron/autoDeploy");
 dotenv.config()
 
-// Connect to DB
+const PORT = process.env.PORT || 3001;
 connect();
-// 2. Configure CORS (Must be before routes)
+
+app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:8080", 
+  origin: [process.env.BASE_URL,"http://localhost:8080" , "http://127.0.0.1:8080"], 
   credentials: true,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 
-app.use(cookieParser());
-
-// Test route - no DB, no controller
-app.get("/api/v1/test", (req, res) => {
+app.get("/api/v1/health", (req, res) => {
     res.json({ msg: "Backend is alive" });
 });
 
@@ -37,18 +36,10 @@ app.use(`${API}/services`, require("./routes/services.routes"));
 app.use(`${API}/servers`, require("./routes/servers.routes"));
 app.use(`${API}/billing`, require("./routes/billing.routes"));
 app.use(`${API}/checkout`, require("./routes/checkout.routes"));
-
-app.listen(3001, () => {
-    console.log("🚀 Server running on http://localhost:3001");
+app.use(`${API}/admin`, require("./routes/admin/user.routes"));
+app.use(`${API}/admin/billing`, require("./routes/admin/billing.routes"));
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on PORT ${PORT}`);
 });
 
-
-
-
-
-// app.use(`${API}/dashboard`, require("./routes/dashboard.routes"));
-// app.use(`${API}/nodes`, require("./routes/node.routes"));
-// app.use(`${API}/instances`, require("./routes/instance.routes"));
-// app.use(`${API}/services`, require("./routes/service.routes"));
-// app.use(`${API}/billing`, require("./routes/billing.routes"));
-// app.use(`${API}/system`, require("./routes/system.routes"));
+startServiceProvisioningCron();

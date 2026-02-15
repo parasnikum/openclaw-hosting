@@ -3,8 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
 
 export const isAuthenticated = (): boolean => {
-  // 1. Get token from cookie (replace 'token' with your actual cookie name)
-  const token = Cookies.get("jwt"); 
+  const token = Cookies.get("jwt");
 
   if (!token) return false;
 
@@ -12,16 +11,32 @@ export const isAuthenticated = (): boolean => {
     const decoded: { exp: number } = jwtDecode(token);
     const currentTime = Date.now() / 1000;
 
-    // 2. Check Expiration
     if (decoded.exp < currentTime) {
-      // Clean up the expired cookie
-      Cookies.remove("token");
+      Cookies.remove("jwt"); // ✅ fixed cookie name
       return false;
     }
-
+    
     return true;
-  } catch (error) {
-    // If token is malformed
+  } catch {
+    return false;
+  }
+};
+
+export const isAdmin = (): boolean => {
+  const token = Cookies.get("jwt");
+
+  if (!token) return false;
+
+  try {
+    const decoded: { exp: number; role: string } = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+
+    if (decoded.exp < currentTime) {
+      Cookies.remove("jwt"); // ✅ fixed cookie name
+      return false;
+    }
+    return decoded.role === "Admin";
+  } catch {
     return false;
   }
 };

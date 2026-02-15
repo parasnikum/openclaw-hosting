@@ -68,20 +68,20 @@ export default function CreateInstance() {
       }
 
       const options: any = {
-        key: "rzp_test_SEW6QmBtngxN1O",
-        amount: amount * 100, // Amount in paise
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount * 100, 
         currency: currency,
-        name: "Openclaw AI",
+        name: formData.name,
         description: `Instance Deployment: ${formData.name}`,
         order_id: orderId, 
         handler: (response: any) => {
-          resolve(response); // Success!
+          resolve(response); 
         },
         modal: {
           ondismiss: () => reject(new Error("Payment window closed")),
         },
         prefill: {
-          name: "Openclaw User",
+          name: "BerryBox User",
           email: "user@example.com",
           contact: "9999999999"
         },
@@ -182,8 +182,11 @@ export default function CreateInstance() {
                     <Select value={formData.aiProvider} onValueChange={(v) => setFormData({ ...formData, aiProvider: v })}>
                       <SelectTrigger className="bg-background h-11 border-border/50 rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="openai">OpenAI GPT-4o</SelectItem>
-                        <SelectItem value="google">Google Gemini 1.5 Pro</SelectItem>
+                        <SelectItem value="openai">Openai</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
+                        <SelectItem value="anthropic">Antropic</SelectItem>
+                        <SelectItem value="openrouter">Openrouter</SelectItem>
+                        <SelectItem value="vercel-ai-gateway">Vercel Ai Gateway</SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="relative">
