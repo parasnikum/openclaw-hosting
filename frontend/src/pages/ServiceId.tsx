@@ -34,7 +34,6 @@ export default function AdminServiceDetail() {
     const finalResources = Object.fromEntries(resources.map(r => [r.key, r.value]));
     const finalEnv = Object.fromEntries(envVars.map(e => [e.key, e.value]));
     
-    console.log("Saving to PG:", { finalResources, finalEnv });
     toast.success("Service configuration updated successfully");
   };
 

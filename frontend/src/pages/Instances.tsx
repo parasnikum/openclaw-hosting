@@ -25,7 +25,6 @@ export default function Instances() {
 
   const fetchMyServices = async () => {
     try {
-      console.log(`${import.meta.env.VITE_API_URL}/services/my`,);
       
       const res = await fetch(`${import.meta.env.VITE_API_URL}/services/my`, {
         method :  "GET",
@@ -33,10 +32,8 @@ export default function Instances() {
       });
       const data = await res.json();
       if (res.ok) setInstances(data);
-      console.log("instance",data);
       
     } catch (error) {
-      console.log(error);
       toast.error("Could not sync instances");
     } finally {
       setIsLoading(false);

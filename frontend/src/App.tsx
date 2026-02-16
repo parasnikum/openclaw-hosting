@@ -33,6 +33,9 @@ import UserManagement from "./pages/admin/Users";
 import PendingOrders from "./pages/admin/PendingOrders";
 import GlobalInvoices from "./pages/admin/Invoices";
 import NextRenewals from "./pages/admin/NextRenewals";
+import PrivacyPolicy from "./pages/legal/Privacy";
+import RefundPolicy from "./pages/legal/Refund";
+import TermsAndConditions from "./pages/legal/TermsAndConditions";
 
 const queryClient = new QueryClient();
 
@@ -49,13 +52,16 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify" element={<VerifyEmail />} />
           <Route path="/" element={<HomePage />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/refund" element={<RefundPolicy />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/instances" element={<Instances />} />
               <Route path="/instances/:id" element={<InstanceDetail />} />
               <Route path="/services" element={<AdminServices />} />
-              {/* <Route path="/profile" element={<Profile />} /> */}
+              <Route path="/profile" element={<Profile />} />
 
               <Route path="/services/:id" element={<AdminServiceDetail />} />
               <Route path="/create" element={<CreateInstance />} />

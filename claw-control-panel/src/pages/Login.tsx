@@ -19,7 +19,6 @@ export default function LoginPage() {
     email: '',
     password: ''
   });
-console.log(`${import.meta.env.VITE_API_URL}`);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -119,7 +118,7 @@ console.log(`${import.meta.env.VITE_API_URL}`);
                   <Input 
                     id="email" 
                     type="email"
-                    placeholder="admin@cloudnode.io" 
+                    placeholder="alex@berrybox.cloud" 
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="pl-11 h-12 bg-muted/30 border-border/50 focus:ring-primary/20 rounded-xl transition-all" 

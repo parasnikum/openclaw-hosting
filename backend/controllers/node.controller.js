@@ -78,7 +78,6 @@ exports.get = async (req, res) => {
  * UPDATE NODE (Partial)
  */
 exports.update = async (req, res) => {
-  console.log("hello");
   try {
     
     const { nodeId } = req.params;

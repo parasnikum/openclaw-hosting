@@ -20,8 +20,6 @@ const db = new Pool({
 
 
 db.on("error", err => {
-  console.log(process.env.DB_USER);
-
   console.error("PG pool error", err);
   process.exit(1);
 });

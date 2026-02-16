@@ -43,7 +43,6 @@ export default function CreateInstance() {
       .then(res => res.json())
       .then(data => setAvailablePlans(data))
       .catch(() => toast.error("Failed to fetch plans"));
-      console.log(availablePlans);
       
   }, []);
 

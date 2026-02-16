@@ -55,10 +55,8 @@ export default function RegisterPage() {
           password: formData.password
         }),
       });
-      console.log(`${import.meta.env.VITE_API_URL}/auth/register`);
       
       const data = await response.json();
-      console.log(response);
 
       if (response.ok) {
         toast.success('Account created! Please check your email to verify.');

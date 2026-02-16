@@ -63,7 +63,6 @@ const SSL_CA_PATH = "ca.pem";
       });
     });
 
-    console.log(JSON.stringify(schema, null, 2));
 
   } catch (err) {
     console.error("Error fetching schema:", err);

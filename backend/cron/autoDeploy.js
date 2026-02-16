@@ -58,11 +58,11 @@ async function processPendingServices() {
         let node = await getAvailableNode();
 
         if (!node) {
-            console.log("No available nodes, waiting 30 seconds before retrying...");
+            // console.log("No available nodes, waiting 30 seconds before retrying...");
             await new Promise(res => setTimeout(res, 30000)); // wait 30s
             node = await getAvailableNode();
             if (!node) {
-                console.log(`Skipping service ${service.id}, no nodes available.`);
+                // console.log(`Skipping service ${service.id}, no nodes available.`);
                 continue;
             }
         }
@@ -76,7 +76,7 @@ async function processPendingServices() {
             });
 
             if (response.ok) {
-                console.log(`Service ${service.id} build triggered on node ${node.node_id}`);
+                // console.log(`Service ${service.id} build triggered on node ${node.node_id}`);
             } else {
                 console.error(`Failed to trigger service ${service.id} build. Status: ${response.status}`);
             }
@@ -88,7 +88,7 @@ async function processPendingServices() {
 
 function startServiceProvisioningCron() {
     cron.schedule('*/30 * * * * *', async () => {
-        console.log("Cron running: checking pending/provisioning services...");
+        // console.log("Cron running: checking pending/provisioning services...");
         await processPendingServices();
     });
 }

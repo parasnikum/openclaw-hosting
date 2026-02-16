@@ -103,7 +103,6 @@ async function action(req, res) {
         state = await doRestart(server);
         break;
     }
-    console.log(`Action ${action} Done`)
     return res.status(200).json({
       status: "success",
       state,

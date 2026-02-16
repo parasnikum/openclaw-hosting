@@ -2,6 +2,7 @@
 const pool = require('../config/db');
 const { v4: uuidv4 } = require('uuid');
 const { encryptEnvValue, decryptEnvValue } = require("../utils/encryption")
+const emailHelper = require("../helpers/mailHelper")
 /**
  * CREATE SERVICE (Purchase/Initialize)
  */
@@ -39,11 +40,16 @@ exports.createService = async (req, res) => {
 
   try {
     const { service_name, plan_id, config, payment_mode } = req.body;
-    console.log(JSON.stringify(req.body));
 
     const user_id = req.user.userid;
 
     // 1. Fetch plan (single source of truth)
+    const userRes = await client.query(
+      "SELECT id, email, username, is_verified FROM users WHERE id = $1",
+      [user_id]
+    );
+    const user = userRes.rows[0];
+
     const planRes = await client.query(
       "SELECT id, price FROM plans WHERE id = $1",
       [plan_id]
@@ -150,11 +156,13 @@ exports.createService = async (req, res) => {
     );
 
     // 7. Transaction
+    const transaction_id = uuidv4();
+    const order_id = `ORDER-${uuidv4().split("-")[0]}`;
     await client.query(
       `INSERT INTO transactions
        (transaction_id, service_id, user_id, price, payment_mode, status, order_id)
        VALUES ($1, $2, $3, $4, $5, 'Paid', $6)`,
-      [uuidv4(), serviceId, user_id, plan.price, payment_mode, `ORDER-${Date.now()}`]
+      [transaction_id, serviceId, user_id, plan.price, payment_mode, order_id]
     );
     const subdomain = `${uuidv4().split("-")[0]}-openclaw`;
 
@@ -167,10 +175,18 @@ exports.createService = async (req, res) => {
     );
 
     await client.query("COMMIT");
+    const placeholders = {
+      username: user.username,
+      service_link: `${process.env.BASE_URL}/instances/${serviceId}`,
+      transaction_id: transaction_id,
+      price: plan.price,
+      plan_name: plan.name,
+      date: Date.now(),
+    }
 
+    await emailHelper(user.email, "Order Placed !", 'orderplaced.html', placeholders)
     const node = await getAvailableNode();
 
-    // Send success immediately
     res.status(201).json({
       status: "Success",
       msg: `Service created successfully. Provisioning has started.`,
@@ -178,7 +194,6 @@ exports.createService = async (req, res) => {
       node: { ip: node.ip, port: node.port }
     });
 
-    // 🔥 Run build in background (do not await)
     (async () => {
       try {
         const node = await getAvailableNode();

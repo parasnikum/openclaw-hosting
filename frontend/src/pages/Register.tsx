@@ -70,10 +70,8 @@ export default function RegisterPage() {
           last_name: formData.last_name,
         }),
       });
-      console.log(`${import.meta.env.VITE_API_URL}/auth/register`);
 
       const data = await response.json();
-      console.log(response);
 
       if (response.ok) {
         toast.success('Account created! Please check your email to verify.');
@@ -113,13 +111,15 @@ export default function RegisterPage() {
       <div className="w-full max-w-[480px] space-y-6 relative z-10 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-2">
           <div
-            className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2 cursor-pointer transition-transform hover:scale-110 group"
+            className="h-14 w-14 rounded-2xl flex items-center justify-center mb-2 cursor-pointer transition-transform hover:scale-110 group"
             onClick={() => navigate('/login')}
           >
-            <Zap className="h-8 w-8 text-primary-foreground fill-current group-hover:animate-pulse" />
+            {/* <Zap className="h-8 w-8 text-primary-foreground fill-current group-hover:animate-pulse" /> */}
+            <img src="Berry_Box_Logo.png" alt="BerryBox Logo" />
+
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Create Account</h1>
-          <p className="text-sm text-muted-foreground font-medium px-4">Join the CloudNode developer network</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">BerryBox Cloud</h1>
+          <p className="text-sm text-muted-foreground font-medium px-4">Join the developer network</p>
         </div>
 
         <Card className="border-border/50 shadow-2xl backdrop-blur-md bg-card/70 dark:bg-card/80 rounded-[2rem] overflow-hidden mx-auto">

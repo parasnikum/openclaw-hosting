@@ -33,7 +33,8 @@ export default function CreateInstance() {
       discord: { enabled: false, token: '' },
       telegram: { enabled: false, botToken: '', dmPolicy: 'pairing' },
       whatsapp: { enabled: false, dmPolicy: 'pairing', allowFrom: '', groupAllowFrom: '' }
-    }
+    },
+    paymentMethod: ''
   });
   const usedProviders = formData.aiConfigs.map(c => c.provider);
 
@@ -139,9 +140,10 @@ export default function CreateInstance() {
     if (!selectedPlan) return;
     setIsProcessing(true);
     try {
+      const currency = formData.paymentMethod === "upi" ? "INR" : "USD";
       const price = Number(selectedPlan.price);
-      const orderId = await createOrder(price, "INR");
-      const payment = await initiatePayment(price, "INR", orderId);
+      const orderId = await createOrder(price, currency);
+      const payment = await initiatePayment(price, currency, orderId);
 
       const finalChannels: any = {};
       const { slack, discord, telegram, whatsapp } = formData.channels;
@@ -410,16 +412,85 @@ export default function CreateInstance() {
           ) : (
             <div className="space-y-8 animate-in zoom-in-95">
               <div className="text-center">
-                <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20"><ShieldCheck className="h-8 w-8 text-primary" /></div>
+                <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                  <ShieldCheck className="h-8 w-8 text-primary" />
+                </div>
                 <h2 className="text-3xl font-black tracking-tight text-foreground">Checkout Summary</h2>
               </div>
+
               <div className="rounded-[2.5rem] bg-muted/20 p-8 border border-border/50 space-y-5">
-                <div className="flex justify-between items-center"><span className="text-muted-foreground uppercase text-[10px] tracking-widest">Instance</span><span className="font-bold text-lg">{formData.name}</span></div>
-                <div className="flex justify-between items-center"><span className="text-muted-foreground uppercase text-[10px] tracking-widest">Compute Tier</span><span className="font-bold text-lg">{selectedPlan?.plan_name}</span></div>
-                <div className="pt-6 border-t border-border/50 flex justify-between items-end"><span className="text-5xl font-black text-primary">${selectedPlan?.price}</span></div>
+                {/* Instance Details */}
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground uppercase text-[10px] tracking-widest">Instance</span>
+                  <span className="font-bold text-lg">{formData.name}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground uppercase text-[10px] tracking-widest">Compute Tier</span>
+                  <span className="font-bold text-lg">{selectedPlan?.plan_name}</span>
+                </div>
+
+                {/* Payment Mode Selection */}
+                <div className="space-y-3 pt-4 border-t border-border/50">
+                  <Label className="text-[10px] uppercase font-black text-primary tracking-widest ml-1">
+                    Select Payment Mode
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* UPI Option */}
+                    <div
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'upi' })}
+                      className={cn(
+                        "relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group",
+                        formData.paymentMethod === 'upi'
+                          ? "border-primary bg-primary/5 shadow-lg"
+                          : "border-border/50 bg-background/30 hover:border-primary/30"
+                      )}
+                    >
+                      <div className="space-y-1">
+                        <p className="text-sm font-black">UPI / Netbanking</p>
+                        <p className="text-[9px] uppercase font-bold text-muted-foreground">Fast & Secure (India Only)</p>
+                      </div>
+                      <img src="/upi_logo.png" alt="UPI" className="h-6 object-contain transition-all" />
+                      {formData.paymentMethod === 'upi' && (
+                        <div className="absolute -top-2 -right-2 bg-primary text-white rounded-full p-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Option */}
+                    <div
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'card' })}
+                      className={cn(
+                        "relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group",
+                        formData.paymentMethod === 'card'
+                          ? "border-primary bg-primary/5 shadow-lg"
+                          : "border-border/50 bg-background/30 hover:border-primary/30"
+                      )}
+                    >
+                      <div className="space-y-1">
+                        <p className="text-sm font-black">Credit / Debit Card</p>
+                        <p className="text-[9px] uppercase font-bold text-muted-foreground">International Payments</p>
+                      </div>
+                      <img src="/card_logos.png" alt="Visa Mastercard" className="h-6 object-contain transition-all" />
+                      {formData.paymentMethod === 'card' && (
+                        <div className="absolute -top-2 -right-2 bg-primary text-white rounded-full p-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Final Price */}
+                <div className="pt-6 border-t border-border/50 flex justify-between items-end">
+                  <span className="text-5xl font-black text-primary">${selectedPlan?.price}</span>
+                </div>
               </div>
+
               <div className="flex gap-4 pt-4">
-                <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold" onClick={() => setStep(1)} disabled={isProcessing}>Modify Settings</Button>
+                <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold" onClick={() => setStep(1)} disabled={isProcessing}>
+                  Modify Settings
+                </Button>
                 <Button className="flex-[2] h-14 rounded-2xl font-black text-lg" disabled={isProcessing} onClick={handlePlaceOrder}>
                   {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : "Deploy & Pay Now"}
                 </Button>

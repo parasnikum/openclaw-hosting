@@ -39,7 +39,6 @@ async function getTargetFromDB(hostname) {
     if (res.rows.length === 0) return null;
     
     const { ip, port } = res.rows[0];
-    console.log(ip,port);
     return `http://${ip}:${port}`;
   } finally {
     client.release();

@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret_key";
 
 const verifyAuth = (req, res, next) => {
     const token = req.cookies?.jwt;
-
+    
     if (!token) {
         return res.status(401).json({
             authenticated: false,

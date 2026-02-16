@@ -59,7 +59,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-md  flex items-center justify-center">
             {/* <span className="text-primary-foreground font-semibold text-sm">O</span> */}
-            <img src="openclaw.png" alt="BerryBox.cloud Logo" />
+            <img src="Berry_Box_Logo.png" alt="BerryBox.cloud Logo" />
           </div>
           <span className="font-semibold text-foreground hidden sm:block">BerryBox Cloud</span>
         </div>
@@ -137,11 +137,13 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
-            {/* <DropdownMenuItem className="gap-2">
-              <User className="h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
+              <a href="/profile">
             <DropdownMenuItem className="gap-2">
+                <User className="h-4 w-4" />
+                Profile
+            </DropdownMenuItem>
+              </a>
+            {/* <DropdownMenuItem className="gap-2">
               <Settings className="h-4 w-4" />
               Settings
             </DropdownMenuItem> */}

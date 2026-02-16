@@ -2,13 +2,17 @@ const pool = require('../config/db');
 const { v4: uuidv4 } = require('uuid');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const dotenv = require("dotenv")
+dotenv.config({ path: "../.env" })
+
 const razorpay = new Razorpay({
-    key_id: 'rzp_test_SEW6QmBtngxN1O',
-    key_secret: 'v0bjd1V625sMXzYbc0Jy6SVc',
+    key_id: process.env.RAZORPAY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const {config} = require("dotenv");
+const { config } = require("dotenv");
 const path = require('path');
+const { sendNewPurchaseAlert } = require('../utils/discordWebhook');
 config({ path: path.resolve(__dirname, "../.env") });
 /**
  * RENEW SERVICE
@@ -31,10 +35,11 @@ exports.createRenewalOrder = async (req, res) => {
         };
 
         const order = await razorpay.orders.create(options);
+        sendNewPurchaseAlert({ customerName: user_id, orderId: razorpay_order_id, total: price, items: [{ "Rewal": planName }] })
         res.status(200).json(order);
     } catch (error) {
         console.log(error);
-        
+
         res.status(500).json({ error: "Order creation failed" });
     }
 };
@@ -61,8 +66,8 @@ exports.verifyRenewalPayment = async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        const planRes = await client.query('SELECT price FROM plans WHERE id = $1', [planId]);
-        const { price } = planRes.rows[0];
+        const planRes = await client.query('SELECT price , name  FROM plans WHERE id = $1', [planId]);
+        const { price, name: planName } = planRes.rows[0];
 
         // Update Service Date
         const updateServiceQuery = `
@@ -90,8 +95,9 @@ exports.verifyRenewalPayment = async (req, res) => {
              VALUES ($1, $2, $3, $4, 'Paid', $5)`,
             [uuidv4(), serviceId, user_id, price, serviceUpdate.rows[0].renewal_date]
         );
-
         await client.query('COMMIT');
+        sendNewPurchaseAlert({ customerName: user_id, orderId: razorpay_order_id, total: price, items: [{ "Rewal": planName }] })
+
         res.status(200).json({ status: "Success", msg: "Service Renewed!" });
     } catch (error) {
         await client.query('ROLLBACK');

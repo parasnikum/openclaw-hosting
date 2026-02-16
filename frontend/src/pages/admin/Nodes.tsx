@@ -44,7 +44,6 @@ export default function AdminNodes() {
             });
             const data = await res.json();
             if (res.ok) setNodes(data);
-            console.log(data);
             
         } catch (error) {
             toast.error("Failed to fetch node cluster data");

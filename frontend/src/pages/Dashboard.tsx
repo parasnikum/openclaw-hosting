@@ -28,7 +28,6 @@ export default function Dashboard() {
         
         if (res.ok) {
           setInstances(data);
-          console.log(data);
 
           const running = data.filter((i: any) => i.status === 'Active').length;
           const stopped = data.filter((i: any) => i.status !== 'Active').length;

@@ -39,8 +39,6 @@ export default function ForgotPasswordPage() {
         toast.error(data.msg || "Request failed");
       }
     } catch (error) {
-        console.log(error);
-        
       toast.error("Network error.");
     } finally {
       setIsLoading(false);
@@ -49,7 +47,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-background to-background transition-colors duration-500">
-      
+
       {/* Theme Toggle */}
       <div className="fixed bottom-8 left-8 z-50">
         <Button

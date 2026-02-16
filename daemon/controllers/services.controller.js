@@ -6,7 +6,6 @@ import { deploy, redeploy } from "../docker/deploy.js";
 export async function buildService(req, res) {
   const { serviceID } = req.params;
   const { category } = req.body;
-  console.log(category);
 
   const result = await pool.query(
     ` SELECT  s.*,

@@ -61,12 +61,6 @@ function writeGatewayConfig(configBaseDir, token, hostname, envs, agentsConfig, 
   }
   const configPath = path.join(configBaseDir, "openclaw.json");
 
-  let agentsObj = agentsConfig || {};
-  console.log(typeof agentsConfig);
-  console.log(agentsConfig);
-  
-  // console.log("PARSE",JSON.parse(agentsConfig));
-  
   let configData = {
     gateway: {
       mode: "local",
@@ -235,7 +229,6 @@ export async function deploy(serviceId, category) {
     );
 
     const config = await generateConfig(providers, channelNames)
-    console.log(providers, channelNames);
 
     writeGatewayConfig(configBaseDir, token, hostname, envs, config.agentsConfig, config.channels);
 
@@ -359,7 +352,6 @@ export async function redeploy(serviceId, category) {
     );
 
     const config = await generateConfig(providers, channelNames)
-    console.log(providers, channelNames, envs);
 
     writeGatewayConfig(configBaseDir, token, hostname, envs, config.agentsConfig, config.channels);
 
@@ -432,7 +424,6 @@ export async function redeploy(serviceId, category) {
 /* -------------------------------------------------- */
 
 export async function reconcileServices() {
-  console.log(`[Cron] ${new Date().toISOString()} - Reconciliation started`);
 
   const client = await pool.connect();
 
@@ -445,17 +436,17 @@ export async function reconcileServices() {
     );
 
     if (!rows.length) {
-      console.log("[Cron] No stuck services.");
+      // console.log("[Cron] No stuck services.");
       return;
     }
 
-    console.log(`[Cron] Found ${rows.length} services to reconcile.`);
+    // console.log(`[Cron] Found ${rows.length} services to reconcile.`);
 
     for (const service of rows) {
       try {
-        console.log(`[Cron] Redeploying ${service.id}`);
+        // console.log(`[Cron] Redeploying ${service.id}`);
         await redeploy(service.id, service.category);
-        console.log(`[Cron] Recovered ${service.id}`);
+        // console.log(`[Cron] Recovered ${service.id}`);
       } catch (err) {
         console.error(`[Cron] Failed ${service.id}:`, err.message);
       }

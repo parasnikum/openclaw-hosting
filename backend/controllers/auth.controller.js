@@ -40,11 +40,9 @@ const generateEmailVerificationToken = (userId, email) => {
 
 
 exports.register = async (req, res) => {
-    console.log(req.body);
     const client = await pool.connect();
     try {
         const { username, email, password, last_name, first_name } = req.body;
-        console.log(req.body);
 
         if (!username || !email || !password || !last_name || !first_name) return res.status(400).json({ msg: "All fields required" });
 
@@ -97,7 +95,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(req.body);
 
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
         const user = result.rows[0];
@@ -119,7 +116,6 @@ exports.login = async (req, res) => {
             { expiresIn: "2d" }
         );
 
-        console.log(token);
 
         res.cookie("jwt", token, {
             httpOnly: true,
@@ -216,8 +212,13 @@ exports.profile = async (req, res) => {
 
 exports.changepassword = async (req, res) => {
     try {
-        const { email, userid, password, newPassword } = req.body;
+        const { email, currentPassword, newPassword } = req.body;
+        const { token } = req.query
 
+        const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(404).json({ status: "error", msg: "User not found" });
+        }
         const query = `
             SELECT id, email, password 
             FROM users 
@@ -225,15 +226,14 @@ exports.changepassword = async (req, res) => {
             LIMIT 1
         `;
 
-        const data = await pool.query(query, [email || null, userid || null]);
+        const data = await pool.query(query, [email || null, decoded.userid || null]);
 
         if (data.rows.length === 0) {
             return res.status(404).json({ status: "error", msg: "User not found" });
         }
-
         const user = data.rows[0];
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ status: "error", msg: "Current password mismatch" });
         }
@@ -369,7 +369,6 @@ exports.verifyEmail = async (req, res) => {
             return res.status(400).json({ msg: "Verification token is missing" });
         }
 
-        console.log(token);
 
         // 1. Verify the JWT Token
         let decoded;
@@ -437,11 +436,11 @@ exports.verifyEmail = async (req, res) => {
 exports.getMe = async (req, res) => {
     try {
         const token = req.query?.token
-        
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const decoded = await jwt.verify(token, process.env.JWT_SECRET);
         if (decoded) {
             const result = await pool.query(
-                'SELECT id, username, role, is_suspended, is_verified , email FROM users WHERE id = $1',
+                'SELECT id, username, role, is_suspended, is_verified , first_name , last_name, email FROM users WHERE id = $1',
                 [decoded.userid]
             );
             if (result.rows.length === 0) return res.status(404).json({ msg: "User not found" });
@@ -453,7 +452,6 @@ exports.getMe = async (req, res) => {
         }
     } catch (err) {
         console.log(err);
-
         res.status(500).json({ error: err.message });
     }
 };

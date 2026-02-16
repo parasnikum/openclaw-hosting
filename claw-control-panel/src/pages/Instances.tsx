@@ -29,7 +29,6 @@ export default function Instances() {
       const data = await res.json();
       if (res.ok) {
         setInstances(data);
-        console.log(data);
 
       }
     } catch (error) {

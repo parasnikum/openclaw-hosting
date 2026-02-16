@@ -103,10 +103,11 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] space-y-6 relative z-10 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2 transform transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate('/')}>
-            <Zap className="h-8 w-8 text-primary-foreground fill-current" />
+          <div className="h-14 w-14 rounded-2xl  flex items-center justify-center mb-2 transform transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate('/')}>
+            {/* <Zap className="h-8 w-8 text-primary-foreground fill-current" /> */}
+            <img src="Berry_Box_Logo.png" alt="BerryBox Logo" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">CloudNode</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">BerryBox Cloud</h1>
           <p className="text-sm text-muted-foreground font-medium px-4">Instance Management Portal</p>
         </div>
 
@@ -130,7 +131,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@cloudnode.io"
+                    placeholder="alex@berrybox.cloud"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-11 h-12 bg-muted/30 border-border/50 rounded-xl transition-all"
@@ -178,7 +179,7 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="relative my-6">
+            {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50"></span></div>
               <div className="relative flex justify-center text-[10px] uppercase font-black">
                 <span className="bg-card dark:bg-[#1c1c1f] px-3 text-muted-foreground tracking-widest">Sso Gateway</span>
@@ -192,7 +193,7 @@ export default function LoginPage() {
               <Button variant="outline" className="h-11 rounded-xl border-border/50 bg-muted/20 hover:bg-muted/40 font-bold text-[10px] uppercase tracking-widest">
                 <Chrome className="mr-2 h-4 w-4" /> Google
               </Button>
-            </div>
+            </div> */}
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pb-8 pt-2">
@@ -203,7 +204,7 @@ export default function LoginPage() {
                 onClick={() => navigate('/register')}
                 className="text-primary font-black hover:underline underline-offset-4"
               >
-                Request Access
+                Create Account
               </button>
             </p>
           </CardFooter>

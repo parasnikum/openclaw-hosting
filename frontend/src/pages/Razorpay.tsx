@@ -24,7 +24,6 @@ export function RazorpayCheckout({
       description: `Deployment for ${projectName}`,
       order_id: orderId, 
       handler: (response) => {
-        console.log("Payment success:", response);
         navigate(
           `/checkout/success?name=${encodeURIComponent(projectName)}`
         );

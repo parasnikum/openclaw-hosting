@@ -9,7 +9,6 @@ import dotenv from "dotenv"
 dotenv.config();
 import {reconcileServices} from "./docker/deploy.js"
 setInterval(() => {
-  console.log("Running reconcileServices...");
   reconcileServices();
 }, 5 * 1000);
 
@@ -28,5 +27,5 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 
 const PORT = process.env.API_PORT || 7001;
 server.listen(PORT, () =>
-  console.log(`Agent API listening on ${PORT}`)
+  console.log(`Daemon API listening on ${PORT}`)
 );

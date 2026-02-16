@@ -7,7 +7,7 @@ router.post("/login", AuthController.login);
 router.post("/register", AuthController.register);
 router.post("/logout", AuthController.logout);
 router.get("/profile", AuthController.profile);
-router.get("/change-password", AuthController.changepassword);
+router.post("/change-password", AuthController.changepassword);
 router.post("/forgot-password", AuthController.forgotPassword);
 router.post("/reset-password", AuthController.resetPassword);
 router.get("/verify", AuthController.verifyEmail);
