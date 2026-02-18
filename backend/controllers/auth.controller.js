@@ -38,7 +38,6 @@ const generateEmailVerificationToken = (userId, email) => {
     );
 };
 
-
 exports.register = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -113,7 +112,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign(
             { userid: user.id, username: user.username, email: user.email, role: user.role },
             JWT_SECRET,
-            { expiresIn: "2d" }
+            { expiresIn: "7d" }
         );
 
 

@@ -34,7 +34,7 @@ export default function CreateInstance() {
       telegram: { enabled: false, botToken: '', dmPolicy: 'pairing' },
       whatsapp: { enabled: false, dmPolicy: 'pairing', allowFrom: '', groupAllowFrom: '' }
     },
-    paymentMethod: ''
+    paymentMethod: 'card'
   });
   const usedProviders = formData.aiConfigs.map(c => c.provider);
 
