@@ -77,9 +77,37 @@ proxy.on("error", (err, req, res) => {
 
   if (res && !res.headersSent) {
     if (typeof res.writeHead === 'function') {
-      res.writeHead(502, { "Content-Type": "text/plain" });
-      res.end("Bad Gateway: Target unreachable or timed out.");
-    }
+  res.writeHead(502, { "Content-Type": "text/html" });
+  res.end(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Securing Connection...</title>
+        <style>
+            body { font-family: -apple-system, system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f4f7f9; color: #333; text-align: center; }
+            .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 400px; }
+            .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+            p { color: #666; line-height: 1.5; }
+        </style>
+        <script>
+            // Optional: Auto-refresh the page every 5 seconds to check if SSL/Target is up
+            setTimeout(() => { window.location.reload(); }, 5000);
+        </script>
+    </head>
+    <body>
+        <div class="card">
+            <div class="spinner"></div>
+            <h1>Establishing Connection</h1>
+            <p>Please wait while we secure your connection (SSL). This page will refresh automatically once the site is ready.</p>
+        </div>
+    </body>
+    </html>
+  `);
+}
   }
 });
 

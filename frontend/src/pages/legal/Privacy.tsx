@@ -69,7 +69,7 @@ export default function PrivacyPolicy() {
                                 Third-Party Services
                             </h3>
                             <p>
-                                BerryBox utilizes third-party providers for payment processing (Stripe) and infrastructure hosting.
+                                BerryBox utilizes third-party providers for payment processing (Razorpay) and infrastructure hosting.
                                 These providers have access to your personal information only to perform specific tasks on our behalf
                                 and are obligated not to disclose or use it for any other purpose.
                             </p>
@@ -101,12 +101,6 @@ export default function PrivacyPolicy() {
                         </section>
                     </div>
 
-                    {/* FOOTER ACCENT */}
-                    <div className="mt-24 pt-8 border-t border-white/5 text-center">
-                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.5em]">
-                            &copy; 2026 BERRYBOX CLOUD • ALL RIGHTS RESERVED
-                        </p>
-                    </div>
                 </div>
             </div>
             <Footer />

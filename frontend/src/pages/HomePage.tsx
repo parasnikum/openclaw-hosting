@@ -42,26 +42,26 @@ const OpenClawPaaS = () => {
 
 
   const cards = [
-    { 
-      title: "Isolated Runtimes", 
-      icon: <Cpu />, 
-      sub: "Deployment: 100%", 
-      val: "w-full", 
-      desc: "Kernel-level isolation for every bot. Your AI agents run in hardened micro-VMs, preventing cross-process interference." 
+    {
+      title: "Isolated Runtimes",
+      icon: <Cpu />,
+      sub: "Deployment: 100%",
+      val: "w-full",
+      desc: "Kernel-level isolation for every bot. Your AI agents run in hardened micro-VMs, preventing cross-process interference."
     },
-    { 
-      title: "Instant Provision", 
-      icon: <Workflow />, 
-      sub: "Speed: <12ms", 
-      val: "w-[80%]", 
-      desc: "Deploy OpenClaw instances in under 12 seconds. Pre-configured environments with all dependencies baked into the core kernel." 
+    {
+      title: "Instant Provision",
+      icon: <Workflow />,
+      sub: "Speed: <12ms",
+      val: "w-[80%]",
+      desc: "Deploy OpenClaw instances in under 12 seconds. Pre-configured environments with all dependencies baked into the core kernel."
     },
-    { 
-      title: "Atomic Security", 
-      icon: <Lock />, 
-      sub: "AES: 256-BIT", 
-      val: "w-[95%]", 
-      desc: "End-to-end AES-256 encryption for all node traffic. Secure your data pipelines from the edge to the core." 
+    {
+      title: "Atomic Security",
+      icon: <Lock />,
+      sub: "AES: 256-BIT",
+      val: "w-[95%]",
+      desc: "End-to-end AES-256 encryption for all node traffic. Secure your data pipelines from the edge to the core."
     }
   ];
 
@@ -74,7 +74,7 @@ const OpenClawPaaS = () => {
   ];
 
   return (
-      <div className="sticky top-0 z-[100] w-full border-b bg-[#0B0D17]  border-white/5 shadow-2xl">
+    <div className="sticky top-0 z-[100] w-full border-b bg-[#0B0D17]  border-white/5 shadow-2xl">
 
       {/* --- SYSTEM STATUS BAR (Unchanged) --- */}
       <div className="bg-[#0F172A] border-b border-blue-500/10 py-2 px-6 relative z-[60]">
@@ -108,9 +108,9 @@ const OpenClawPaaS = () => {
                 Deploy dedicated bot nodes with sub-50ms latency and 1-click lifecycle management.
               </p>
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start italic font-black">
-                <button className="w-full sm:w-auto bg-blue-600 hover:bg-white hover:text-black text-white px-10 py-5 rounded-xl text-lg flex items-center justify-center gap-3 transition-all shadow-[0_20px_40px_rgba(37,99,235,0.2)] uppercase">
+                <a href="/dashboard" target="_blank" rel="noopener noreferrer"> <button className="w-full sm:w-auto bg-blue-600 hover:bg-white hover:text-black text-white px-10 py-5 rounded-xl text-lg flex items-center justify-center gap-3 transition-all shadow-[0_20px_40px_rgba(37,99,235,0.2)] uppercase">
                   Launch Node <LayoutDashboard size={20} />
-                </button>
+                </button></a>
                 {/* <button className="w-full sm:w-auto bg-transparent border border-white/10 hover:border-blue-500/40 text-white px-8 py-5 rounded-xl font-bold transition flex items-center justify-center gap-2 uppercase text-xs tracking-[0.2em]">
                   <BookOpen size={18} /> View Docs
                 </button> */}
@@ -178,9 +178,9 @@ const OpenClawPaaS = () => {
         </div>
       </header>
 
-    < Pricing/>
+      < Pricing />
 
-    <Features/>
+      <Features />
 
       <div className="reveal"><TestimonialsSection /></div>
 

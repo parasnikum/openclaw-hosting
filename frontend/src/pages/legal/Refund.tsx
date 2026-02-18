@@ -29,11 +29,11 @@ export default function RefundPolicy() {
             category: "Eligibility", points: [
                 "24-Hour full refund applies only to first-time customers.",
                 "Refund requests must be timestamped within 1,440 minutes of purchase.",
-                "Usage of more than 1GB of egress data voids the instant refund.",
-                "Simultaneous deployment of 5+ nodes voids the 24-hour window.",
-                "Apex Bare-Metal Slices are exempt from the 24-hour full refund.",
+                // "Usage of more than 1GB of egress data voids the instant refund.",
+                "Simultaneous deployment of 3+ nodes voids the 24-hour window.",
+                // "Apex Bare-Metal Slices are exempt from the 24-hour full refund.",
                 "Account must be in good standing with no active abuse reports.",
-                "Trial credits are non-convertible to cash refunds."
+                // "Trial credits are non-convertible to cash refunds."
             ]
         },
         {
@@ -51,7 +51,6 @@ export default function RefundPolicy() {
             category: "Financial Protocols", points: [
                 "Refunds are returned strictly to the original payment source.",
                 "Currency conversion fees are handled by the user's bank.",
-                "Crypto-payment refunds are processed at current market value.",
                 "Chargebacks will result in immediate and permanent account blacklisting.",
                 "Prorated refunds are calculated by the hour, not the day.",
                 "Administrative fees may apply for manual wire-transfer reversals.",
@@ -64,9 +63,7 @@ export default function RefundPolicy() {
                 "Resource mining (Crypto-mining) leads to immediate seizure without refund.",
                 "Identity mismatch between billing and account leads to a hold.",
                 "Multiple accounts created to game the 24-hour policy are banned.",
-                "Compliance with Pune Datacenter local laws is mandatory for claims.",
-                "Refunds are not issued for 'change of mind' after the 24-hour mark.",
-                "Legacy plans (v1.0) follow their original 2024 refund terms."
+                "Refunds are not issued for 'change of mind' .",
             ]
         }
     ];
@@ -92,13 +89,11 @@ export default function RefundPolicy() {
                         <h1 className="text-4xl md:text-7xl font-bold text-white tracking-tighter mb-6">
                             Refund <span className="text-slate-500">Architecture.</span>
                         </h1>
-                        <p className="text-slate-500 text-sm font-medium uppercase tracking-widest">
-                            Last Revision: {lastUpdated} • <span className="text-blue-500">24-Hour Full Guarantee</span>
-                        </p>
+                       
                     </div>
 
                     {/* TOP 3 PILLARS */}
-                    <div className="grid md:grid-cols-3 gap-6 mb-24">
+                    {/* <div className="grid md:grid-cols-3 gap-6 mb-24">
                         {mainPillars.map((pillar, i) => (
                             <div key={i} className="bg-[#0B0D17] border border-white/5 rounded-3xl p-8 flex flex-col transition-all hover:border-blue-500/20 group">
                                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -108,7 +103,7 @@ export default function RefundPolicy() {
                                 <p className="text-slate-400 text-sm leading-relaxed">{pillar.content}</p>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
 
                     {/* ADVANCED 25+ POINTS GRID */}
                     <div className="grid md:grid-cols-2 gap-x-12 gap-y-16 mb-24">
