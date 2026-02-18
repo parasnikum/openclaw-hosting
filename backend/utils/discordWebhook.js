@@ -1,6 +1,6 @@
 const webhookUrl = "https://discord.com/api/webhooks/1472658962317967443/KfhTAoVf5Y-f3H9xEdOHWSSPxU6PXyuarkl54EVMGtUBRTIuLJqcicKCb63JGchShGac";
 
-export async function sendNewPurchaseAlert(order) {
+async function sendNewPurchaseAlert(order) {
   const payload = {
     username: "BerryBox.cloud Store",
     avatar_url: "https://berrybox.cloud/Berry_Box_Logo.png",
@@ -52,6 +52,8 @@ export async function sendNewPurchaseAlert(order) {
   }
 }
 
+
+module.exports = {sendNewPurchaseAlert}
 // Example usage
 // sendNewPurchaseAlert({
 //   customerName: "John Doe",

@@ -66,7 +66,7 @@ function writeGatewayConfig(configBaseDir, token, hostname, envs, agentsConfig, 
       mode: "local",
       bind: "lan",
       port: GATEWAY_PORT,
-      controlUi: { enabled: true, allowInsecureAuth: true, "allowedOrigins": [`http://${hostname}.localhost:8081`] },
+      controlUi: { enabled: true, allowInsecureAuth: true, "allowedOrigins": [`https://${hostname}.berrybox.cloud`] },
       auth: { mode: "token", token },
       trustedProxies: ["192.168.65.0/24", "172.17.0.0/16"],
     },
@@ -138,6 +138,7 @@ async function createContainer({
       `OPENCLAW_GATEWAY_TOKEN=${token}`,
       ...envArray
     ],
+    User: "root",
     ExposedPorts: {
       [`${GATEWAY_PORT}/tcp`]: {},
     },
@@ -431,7 +432,7 @@ export async function reconcileServices() {
     const { rows } = await client.query(
       `SELECT id, category, status
        FROM services
-       WHERE status = 'Provisioning'
+       WHERE status = 'Provisioning' OR status = 'Failed' 
           OR (status = 'Active' AND container_id IS NULL)`
     );
 

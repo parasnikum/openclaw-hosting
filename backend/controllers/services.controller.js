@@ -156,7 +156,7 @@ exports.createService = async (req, res) => {
     );
 
     // 7. Transaction
-    const transaction_id = uuidv4();
+    const transaction_id = `TR${uuidv4().split("-")[0]}`;
     const order_id = `ORDER-${uuidv4().split("-")[0]}`;
     await client.query(
       `INSERT INTO transactions
@@ -175,13 +175,26 @@ exports.createService = async (req, res) => {
     );
 
     await client.query("COMMIT");
+    const now = new Date(Date.now());
+
+    const istTime = now.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
     const placeholders = {
       username: user.username,
       service_link: `${process.env.BASE_URL}/instances/${serviceId}`,
       transaction_id: transaction_id,
-      price: plan.price,
-      plan_name: plan.name,
-      date: Date.now(),
+      price: `$${plan.price}`,
+      plan_name: plan.plan_name,
+      date: istTime,
     }
 
     await emailHelper(user.email, "Order Placed !", 'orderplaced.html', placeholders)
@@ -344,7 +357,7 @@ exports.getServiceDetail = async (req, res) => {
     }
 
     const domainResult = await pool.query(domainQuery, [id]);
-    service.hostname = `http://${domainResult.rows[0].hostname}.localhost:8081`
+    service.hostname = `https://${domainResult.rows[0].hostname}.berrybox.cloud`
     if (serviceResult.rows.length === 0) {
       return res.status(404).json({ msg: "Service not found." });
     }

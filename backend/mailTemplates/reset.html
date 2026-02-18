@@ -5,109 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Your Password - BerryBox Cloud</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: #09090b; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            color: #fafafa; 
-        }
-        .wrapper {
-            width: 100%;
-            background-color: #09090b;
-            padding-bottom: 40px;
-        }
-        .container { 
-            max-width: 600px; 
-            margin: 40px auto; 
-            background-color: #121214; 
-            border: 1px solid #27272a; 
-            border-radius: 24px; 
-            overflow: hidden; 
-        }
-        .header {
-            padding: 40px 0 20px 0;
-            text-align: center;
-            background: radial-gradient(circle at top, #3b82f615 0%, transparent 70%);
-        }
-        .logo-box {
-            display: inline-block;
-            background-color: #3b82f6;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-        .content { 
-            padding: 0 40px 40px 40px; 
-            text-align: center; 
-        }
-        .logo-text { 
-            font-weight: 800; 
-            font-size: 20px; 
-            letter-spacing: -0.5px;
-            margin-bottom: 10px;
-        }
-        h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #ffffff;
-        }
-        p { 
-            color: #a1a1aa; 
-            line-height: 1.6; 
-            font-size: 15px;
-            margin-bottom: 20px;
-        }
-        .btn { 
-            background-color: #3b82f6; 
-            color: #ffffff !important; 
-            padding: 14px 32px; 
-            text-decoration: none; 
-            border-radius: 12px; 
-            font-weight: 600; 
-            display: inline-block; 
-            margin: 10px 0 20px 0;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-        }
-        .footer-note {
-            font-size: 12px; 
-            margin-top: 30px; 
-            color: #52525b;
-        }
-        .divider {
-            height: 1px;
-            background-color: #27272a;
-            margin: 30px 0;
+        /* Reset & Base */
+        body { margin: 0; padding: 0; background-color: #09090b; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+        table { border-spacing: 0; border-collapse: collapse; }
+        td { padding: 0; }
+        
+        @media screen and (max-width: 600px) {
+            .container { width: 95% !important; margin-top: 20px !important; }
+            .content { padding: 30px 24px !important; }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="container">
-            <div class="header">
-                <div class="logo-box">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <div class="logo-text">BerryBox<span style="color: #3b82f6;">Cloud</span></div>
-            </div>
+    <center class="wrapper" style="width: 100%; table-layout: fixed; background-color: #09090b; padding-bottom: 60px;">
+        <table class="container" width="600" cellpadding="0" cellspacing="0" style="margin: 40px auto; background-color: #121214; border: 1px solid #27272a; border-radius: 20px; overflow: hidden;">
+            
+            <tr>
+                <td align="center" style="padding: 45px 0 35px 0; background: linear-gradient(to bottom, #3b82f610 0%, transparent 100%);">
+                    <table role="presentation" align="center" style="margin: 0 auto;">
+                        <tr>
+                            <td style="padding-right: 12px;">
+                                <img src="https://berrybox.cloud/Berry_Box_Logo.png" width="38" height="38" alt="Logo" style="display: block;">
+                            </td>
+                            <td style="font-weight: 700; font-size: 24px; color: #ffffff; letter-spacing: -0.5px;">
+                                BerryBox<span style="color: #3b82f6;">Cloud</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-            <div class="content">
-                <h1>Password Reset Request</h1>
-                <p>Hello <strong>{{username}}</strong>,</p>
-                <p>We received a request to update your account security credentials. To proceed with the password reset protocol, please click the button below. This link is only valid for <strong>15 minutes</strong>.</p>
-                
-                <a href="{{link}}" class="btn">Reset Password</a>
-                
-                <div class="divider"></div>
-                
-                <p class="footer-note">
-                    If you did not initiate this request, your account is still secure. No further action is required.
-                </p>
-            </div>
-        </div>
-    </div>
+            <tr>
+                <td class="content" style="padding: 0 50px 40px 50px; text-align: center;">
+                    <h1 style="font-size: 26px; font-weight: 700; margin: 0 0 16px 0; color: #ffffff;">Password Reset Request</h1>
+                    
+                    <p style="font-size: 16px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0;">
+                        Hello <strong>{{username}}</strong>,
+                    </p>
+                    
+                    <p style="font-size: 15px; line-height: 1.6; color: #a1a1aa; margin: 0 0 30px 0;">
+                        We received a request to update your account security credentials. To proceed with the password reset protocol, please click the button below.
+                    </p>
+
+                    <table role="presentation" align="center" style="margin: 0 auto;">
+                        <tr>
+                            <td align="center" bgcolor="#3b82f6" style="border-radius: 12px;">
+                                <a href="{{link}}" target="_blank" style="font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 16px 40px; display: inline-block;">
+                                    Reset Password
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p style="font-size: 13px; color: #71717a; margin: 25px 0 0 0;">
+                        This secure link is only valid for <strong>15 minutes</strong>.
+                    </p>
+
+                    <table width="100%" style="margin: 40px 0;">
+                        <tr>
+                            <td style="height: 1px; background-color: #27272a;"></td>
+                        </tr>
+                    </table>
+
+                    <p style="font-size: 13px; line-height: 1.5; color: #52525b; margin: 0;">
+                        If you did not initiate this request, your account is still secure. No further action is required.
+                    </p>
+                </td>
+            </tr>
+        </table>
+
+        <table width="600" cellpadding="0" cellspacing="0" style="margin: 0 auto; text-align: center;">
+            <tr>
+                <td style="font-size: 12px; color: #52525b; line-height: 1.8;">
+                    &copy; 2026 BerryBox Cloud. Secure Infrastructure.<br>
+                    <a href="https://berrybox.cloud" style="color: #71717a; text-decoration: none;">Security Dashboard</a> | <a href="#" style="color: #71717a; text-decoration: none;">Contact Support</a>
+                </td>
+            </tr>
+        </table>
+    </center>
 </body>
 </html>

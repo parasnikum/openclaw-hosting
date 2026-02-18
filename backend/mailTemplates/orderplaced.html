@@ -1,212 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmed - BerryBox Cloud</title>
     <style>
-        /* Base Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #09090b;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: #fafafa;
-        }
+        /* Reset & Base */
+        body { margin: 0; padding: 0; background-color: #09090b; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+        table { border-spacing: 0; border-collapse: collapse; }
+        td { padding: 0; }
+        img { border: 0; }
 
-        .wrapper {
-            width: 100%;
-            table-layout: fixed;
-            background-color: #09090b;
-            padding-bottom: 40px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #121214;
-            border: 1px solid #27272a;
-            border-radius: 24px;
-            overflow: hidden;
-            margin-top: 40px;
-        }
-
-        /* Header / Logo Area */
-        .header {
-            padding: 40px 0;
-            text-align: center;
-            background: radial-gradient(circle at top, #3b82f615 0%, transparent 70%);
-        }
-
-        .logo-box {
-            display: inline-block;
-            background-color: #3b82f6;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        /* Content Area */
-        .content {
-            padding: 0 40px 40px 40px;
-            text-align: left;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-            text-align: center;
-        }
-
-        .status-badge {
-            display: block;
-            text-align: center;
-            color: #10b981;
-            /* Emerald 500 */
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        p {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #a1a1aa;
-            margin: 0 0 20px 0;
-        }
-
-        /* Order Summary Card */
-        .order-card {
-            background-color: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .order-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #27272a;
-            padding-bottom: 12px;
-        }
-
-        .order-row:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .label {
-            color: #71717a;
-            font-size: 13px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .value {
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: right;
-        }
-
-        .plan-highlight {
-            color: #3b82f6;
-            font-weight: 700;
-        }
-
-        /* Button */
-        .button-container {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .btn {
-            background-color: #3b82f6;
-            color: #ffffff !important;
-            padding: 14px 32px;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            display: inline-block;
-            transition: background-color 0.3s ease;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 12px;
-            color: #52525b;
+        /* Responsive */
+        @media screen and (max-width: 600px) {
+            .container { width: 95% !important; margin-top: 20px !important; }
+            .content { padding: 30px 20px !important; }
         }
     </style>
 </head>
-
 <body>
-    <div class="wrapper">
-        <div class="container">
-            <div class="header">
-                <div class="logo-box">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">BerryBox<span
-                        style="color: #3b82f6;">Cloud</span></div>
-            </div>
+    <center class="wrapper" style="width: 100%; table-layout: fixed; background-color: #09090b; padding-bottom: 60px;">
+        <table class="container" width="600" cellpadding="0" cellspacing="0" style="margin: 40px auto; background-color: #121214; border: 1px solid #27272a; border-radius: 20px; overflow: hidden; border-spacing: 0;">
+            
+            <tr>
+                <td class="header" style="padding: 40px 0 30px 0; text-align: center; background: linear-gradient(to bottom, #1d4ed810 0%, transparent 100%);">
+                    <table role="presentation" align="center" style="margin: 0 auto;">
+                        <tr>
+                            <td style="padding-right: 12px;">
+                                <img src="https://berrybox.cloud/Berry_Box_Logo.png" width="36" height="36" alt="Logo" style="display: block;">
+                            </td>
+                            <td style="font-weight: 700; font-size: 22px; color: #ffffff; letter-spacing: -0.5px;">
+                                BerryBox<span style="color: #3b82f6;">Cloud</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-            <div class="content">
-                <h1>Deployment Successful</h1>
-                <span class="status-badge">Order Confirmed</span>
-
-                <p>Hello {{username}}, your resources have been provisioned and are ready for production. Your
-                    subscription is now active.</p>
-
-                <div class="order-card">
-                    <div class="order-row" style="display: table; width: 100%;">
-                        <div style="display: table-cell;" class="label">Plan Name</div>
-                        <div style="display: table-cell;" class="value plan-highlight">{{plan_name}}</div>
+            <tr>
+                <td class="content" style="padding: 0 50px 40px 50px;">
+                    <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 10px 0; color: #ffffff; text-align: center;">Deployment Successful</h1>
+                    <div style="text-align: center; color: #10b981; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 30px;">
+                        &bull; Order Confirmed
                     </div>
-                    <div class="order-row" style="display: table; width: 100%;">
-                        <div style="display: table-cell;" class="label">Amount Paid</div>
-                        <div style="display: table-cell;" class="value">{{price}}</div>
-                    </div>
-                    <div class="order-row" style="display: table; width: 100%;">
-                        <div style="display: table-cell;" class="label">Date</div>
-                        <div style="display: table-cell;" class="value">{{date}}</div>
-                    </div>
-                    <div class="order-row" style="display: table; width: 100%;">
-                        <div style="display: table-cell;" class="label">Service Link</div>
-                        <div style="display: table-cell;" class="value">
-                            <a href="{{service_link}}" style="color: #3b82f6; text-decoration: none;">View Instance
-                                &rarr;</a>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="button-container">
-                    <a href="https://berrybox.cloud/dashboard" class="btn">Access Console</a>
-                </div>
+                    <p style="font-size: 16px; line-height: 1.6; color: #a1a1aa; margin: 0 0 30px 0; text-align: center;">
+                        Hello <strong>{{username}}</strong>, your resources have been provisioned and are ready for production. Your subscription is now active.
+                    </p>
 
-                <p style="font-size: 12px; text-align: center; margin-top: 30px; color: #52525b;">
-                    Transaction ID: <code style="color: #a1a1aa;">{{transaction_id}}</code>
-                </p>
-            </div>
-        </div>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #18181b; border: 1px solid #27272a; border-radius: 16px;">
+                        <tr>
+                            <td style="padding: 24px;">
+                                <table width="100%" style="margin-bottom: 15px; border-bottom: 1px solid #27272a;">
+                                    <tr>
+                                        <td style="padding-bottom: 12px; font-size: 12px; font-weight: 600; color: #71717a; text-transform: uppercase;">Plan Name</td>
+                                        <td align="right" style="padding-bottom: 12px; font-size: 15px; font-weight: 600; color: #3b82f6;">{{plan_name}}</td>
+                                    </tr>
+                                </table>
+                                <table width="100%" style="margin-bottom: 15px; border-bottom: 1px solid #27272a;">
+                                    <tr>
+                                        <td style="padding-bottom: 12px; font-size: 12px; font-weight: 600; color: #71717a; text-transform: uppercase;">Amount Paid</td>
+                                        <td align="right" style="padding-bottom: 12px; font-size: 15px; font-weight: 500; color: #ffffff;">{{price}}</td>
+                                    </tr>
+                                </table>
+                                <table width="100%" style="margin-bottom: 15px; border-bottom: 1px solid #27272a;">
+                                    <tr>
+                                        <td style="padding-bottom: 12px; font-size: 12px; font-weight: 600; color: #71717a; text-transform: uppercase;">Date</td>
+                                        <td align="right" style="padding-bottom: 12px; font-size: 15px; font-weight: 500; color: #ffffff;">{{date}}</td>
+                                    </tr>
+                                </table>
+                                <table width="100%">
+                                    <tr>
+                                        <td style="font-size: 12px; font-weight: 600; color: #71717a; text-transform: uppercase;">Service Link</td>
+                                        <td align="right" style="font-size: 15px; font-weight: 500;">
+                                            <a href="{{service_link}}" style="color: #3b82f6; text-decoration: none;">View Instance &rarr;</a>
+                                        </td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                    </table>
 
-        <div class="footer">
-            &copy; 2026 BerryBox Cloud.<br>
-            Automated Provisioning System | High-Performance Nodes
-        </div>
-    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 40px;">
+                        <tr>
+                            <td align="center">
+                                <a href="https://berrybox.cloud/dashboard" style="background-color: #3b82f6; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 600; display: inline-block;">Access Console</a>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p style="font-size: 12px; text-align: center; margin-top: 40px; color: #52525b;">
+                        Transaction ID: <code style="color: #71717a; background: #18181b; padding: 2px 6px; border-radius: 4px;">{{transaction_id}}</code>
+                    </p>
+                </td>
+            </tr>
+        </table>
+
+        <table width="600" cellpadding="0" cellspacing="0" style="margin: 0 auto; text-align: center;">
+            <tr>
+                <td style="font-size: 12px; color: #52525b; line-height: 1.8;">
+                    &copy; 2026 BerryBox Cloud. All rights reserved.<br>
+                </td>
+            </tr>
+        </table>
+    </center>
 </body>
-
 </html>
